@@ -1,0 +1,20 @@
+{
+  "name": "@quikbroker/root",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "private": true,
+  "description": "Quikbroker application",
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "migrate:watch": "dotenv -f .env run yarn workspace @quickbroker/schema watch",
+    "migrate:run": "dotenv -e .env yarn workspace @quickbroker/schema graphile-migrate migrate"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0",
+    "dotenv-cli": "^8.0.0"
+  }
+}
