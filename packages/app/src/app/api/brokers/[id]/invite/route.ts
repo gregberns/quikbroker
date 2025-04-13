@@ -14,8 +14,9 @@ function generateSecureToken(length = 32) {
   return crypto.randomBytes(length).toString('hex');
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params; // Extract id early to avoid Next.js warning
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Await the params Promise before destructuring
+  const { id } = await params;
 
   return requireAuth(req, async (req, session) => {
     // Only admins can send invitations

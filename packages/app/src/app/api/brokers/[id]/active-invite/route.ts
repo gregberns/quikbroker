@@ -8,8 +8,9 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Await the params Promise before destructuring
+  const { id } = await params;
 
   return requireAuth(req, async (req, session) => {
     // Only admins can access invite links
