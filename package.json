@@ -11,7 +11,8 @@
   },
   "scripts": {
     "migrate:watch": "dotenv -f .env yarn workspace @quikbroker/schema watch",
-    "migrate:run": "dotenv -f .env yarn workspace @quikbroker/schema graphile-migrate migrate",
+    "migrate:run": "dotenv -f .env yarn workspace @quikbroker/schema migrate",
+    "migrate:commit": "dotenv -f .env yarn workspace @quikbroker/schema commit",
     "app:dev": "dotenv -f .env yarn workspace @quikbroker/app dev",
     "app:build": "dotenv -f .env yarn workspace @quikbroker/app build",
     "app:start": "dotenv -f .env yarn workspace @quikbroker/app start",

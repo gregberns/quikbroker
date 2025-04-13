@@ -6,7 +6,9 @@
   "author": "",
   "main": "",
   "scripts": {
-    "watch": "graphile-migrate watch"
+    "watch": "graphile-migrate watch",
+    "migrate": "graphile-migrate migrate",
+    "commit": "graphile-migrate commit"
   },
   "dependencies": {
     "graphile-migrate": "^1.2.0",

@@ -58,8 +58,9 @@ export async function POST(req: NextRequest) {
         // In a real app, add token expiry and signature
       });
 
-      // Set the session cookie
-      cookies().set({
+      // Set the session cookie - await cookies() to fix the error
+      const cookieStore = await cookies();
+      cookieStore.set({
         name: 'session',
         value: sessionValue,
         httpOnly: true,
