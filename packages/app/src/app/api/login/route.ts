@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 import { Pool } from "pg";
 import { cookies } from "next/headers";
+import { verifyPassword } from "../../lib/auth";
 
 // Create a connection pool to the database
 const pool = new Pool({
@@ -38,8 +38,8 @@ export async function POST(req: NextRequest) {
 
       const user = result.rows[0];
 
-      // Compare the provided password with the stored hash
-      const passwordMatch = await bcrypt.compare(password, user.password_hash);
+      // Use the centralized password verification function
+      const passwordMatch = await verifyPassword(password, user.password_hash);
 
       if (!passwordMatch) {
         return NextResponse.json(

@@ -16,7 +16,7 @@ export default function AdminHome() {
           <h2 className="text-xl font-bold mb-4 text-gray-900">User Management</h2>
           <p className="mb-6 text-gray-800">Manage system users, reset passwords, and control access permissions.</p>
           <div className="flex flex-col space-y-3">
-            <Link href="/admin/users" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center">
+            <Link href="/dashboard/admin/users" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center">
               View All Users
             </Link>
             <button className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
@@ -30,7 +30,7 @@ export default function AdminHome() {
           <h2 className="text-xl font-bold mb-4 text-gray-900">Broker Management</h2>
           <p className="mb-6 text-gray-800">Add new brokers to the system and manage existing broker relationships.</p>
           <div className="flex flex-col space-y-3">
-            <Link href="/admin/brokers" className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center">
+            <Link href="/dashboard/admin/brokers" className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center">
               View All Brokers
             </Link>
           </div>

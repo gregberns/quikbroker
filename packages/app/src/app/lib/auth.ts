@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import bcrypt from "bcrypt";
+
+// Centralized password handling functions
+const SALT_ROUNDS = 10; // Keep this consistent for all password hashing
+
+/**
+ * Hash a password using bcrypt with consistent salt rounds
+ * @param password The plain text password to hash
+ * @returns The hashed password
+ */
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
+
+/**
+ * Verify a password against a hash
+ * @param password The plain text password to verify
+ * @param hash The hash to compare against
+ * @returns True if the password matches the hash
+ */
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
 
 export async function getAuthSession() {
   try {

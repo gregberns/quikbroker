@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { logError } from '../../../lib/errorHandling';
+import { logError } from '../../../../lib/errorHandling';
 import { use } from 'react';
 
 interface Broker {

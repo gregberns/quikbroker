@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         `SELECT i.*, u.email 
          FROM app.user_invites i
          JOIN app.users u ON i.user_id = u.id
-         WHERE i.token = $1 AND i.used_at IS NULL AND i.expires_at > NOW()`,
+         WHERE i.token = $1 AND i.expires_at > NOW()`,
         [token]
       );
 
@@ -42,11 +42,16 @@ export async function POST(req: NextRequest) {
 
       const invite = inviteResult.rows[0];
 
-      // Mark the invitation as used
-      await client.query(
-        "UPDATE app.user_invites SET used_at = NOW() WHERE id = $1",
-        [invite.id]
-      );
+      // Check if the token has already been used
+      if (invite.used_at) {
+        return NextResponse.json(
+          { message: "This verification link has already been used. Please request a new one." },
+          { status: 400 }
+        );
+      }
+
+      // We don't mark the invitation as used here - we'll do that when they set their password
+      // This allows the token to be valid for the password setting step
 
       // Update the broker invitation sent timestamp if not already set
       await client.query(

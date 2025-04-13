@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
-import { requireAuth } from "../../lib/auth";
-import bcrypt from "bcrypt";
+import { requireAuth, hashPassword } from "../../lib/auth";
 import crypto from "crypto";
 
 // Create a connection pool to the database
@@ -81,7 +80,8 @@ export async function POST(req: NextRequest) {
 
         // 1. Create a temporary random password for the broker user
         const tempPassword = generateSecureToken(12);
-        const passwordHash = await bcrypt.hash(tempPassword, 10);
+        // Use the centralized password hashing function
+        const passwordHash = await hashPassword(tempPassword);
 
         // 2. Create a new user with the broker role
         const userResult = await client.query(

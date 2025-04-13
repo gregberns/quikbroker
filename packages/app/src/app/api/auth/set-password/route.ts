@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
-import bcrypt from "bcrypt";
+import { hashPassword } from "../../lib/auth";
 
 // Create a connection pool to the database
 const pool = new Pool({
@@ -51,8 +51,16 @@ export async function POST(req: NextRequest) {
 
       const invite = inviteResult.rows[0];
 
-      // Hash the new password
-      const passwordHash = await bcrypt.hash(password, 10);
+      // Check if the token has already been used
+      if (invite.used_at) {
+        return NextResponse.json(
+          { message: "This verification link has already been used. Please request a new one." },
+          { status: 400 }
+        );
+      }
+
+      // Use the centralized password hashing function
+      const passwordHash = await hashPassword(password);
 
       // Update the user's password
       await client.query(
@@ -60,13 +68,11 @@ export async function POST(req: NextRequest) {
         [passwordHash, invite.user_id]
       );
 
-      // Mark the invitation as used if not already
-      if (!invite.used_at) {
-        await client.query(
-          "UPDATE app.user_invites SET used_at = NOW() WHERE id = $1",
-          [invite.id]
-        );
-      }
+      // Mark the invitation as used
+      await client.query(
+        "UPDATE app.user_invites SET used_at = NOW() WHERE id = $1",
+        [invite.id]
+      );
 
       // Commit the transaction
       await client.query('COMMIT');
