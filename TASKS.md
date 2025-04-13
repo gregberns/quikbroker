@@ -4,6 +4,9 @@
 
 * Add Brokerage Name
 
+Email: admin@quikbroker.com
+Password: admin123
+
 ## Admin Login
 
 * Tom logs in

@@ -10,8 +10,13 @@
     ]
   },
   "scripts": {
-    "migrate:watch": "dotenv -f .env run yarn workspace @quickbroker/schema watch",
-    "migrate:run": "dotenv -e .env yarn workspace @quickbroker/schema graphile-migrate migrate"
+    "migrate:watch": "dotenv -f .env yarn workspace @quikbroker/schema watch",
+    "migrate:run": "dotenv -f .env yarn workspace @quikbroker/schema graphile-migrate migrate",
+    "app:dev": "dotenv -f .env yarn workspace @quikbroker/app dev",
+    "app:build": "dotenv -f .env yarn workspace @quikbroker/app build",
+    "app:start": "dotenv -f .env yarn workspace @quikbroker/app start",
+    "app:lint": "dotenv -f .env yarn workspace @quikbroker/app lint",
+    "app:format": "dotenv -f .env yarn workspace @quikbroker/app format"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",
