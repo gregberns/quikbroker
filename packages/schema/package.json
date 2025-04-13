@@ -6,13 +6,14 @@
   "author": "",
   "main": "",
   "scripts": {
-    "watch": "graphile-migrate watch",
-    "migrate": "graphile-migrate migrate",
-    "commit": "graphile-migrate commit"
+    "create-migration": "node-pg-migrate create",
+    "create": "node-pg-migrate create current.sql",
+    "migrate": "node-pg-migrate up",
+    "rollback": "node-pg-migrate down"
   },
   "dependencies": {
-    "graphile-migrate": "^1.2.0",
     "pg-connection-string": "^2.0.0",
-    "tslib": "^1.10.0"
+    "tslib": "^1.10.0",
+    "node-pg-migrate": "^6.2.0"
   }
 }

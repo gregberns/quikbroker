@@ -10,14 +10,14 @@
     ]
   },
   "scripts": {
-    "migrate:watch": "dotenv -f .env yarn workspace @quikbroker/schema watch",
-    "migrate:run": "dotenv -f .env yarn workspace @quikbroker/schema migrate",
-    "migrate:commit": "dotenv -f .env yarn workspace @quikbroker/schema commit",
     "app:dev": "dotenv -f .env yarn workspace @quikbroker/app dev",
     "app:build": "dotenv -f .env yarn workspace @quikbroker/app build",
     "app:start": "dotenv -f .env yarn workspace @quikbroker/app start",
     "app:lint": "dotenv -f .env yarn workspace @quikbroker/app lint",
-    "app:format": "dotenv -f .env yarn workspace @quikbroker/app format"
+    "app:format": "dotenv -f .env yarn workspace @quikbroker/app format",
+    "schema:run": "dotenv -f .env yarn workspace @quikbroker/schema create",
+    "schema:migrate": "dotenv -f .env yarn workspace @quikbroker/schema migrate",
+    "schema:rollback": "dotenv -f .env yarn workspace @quikbroker/schema rollback"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",

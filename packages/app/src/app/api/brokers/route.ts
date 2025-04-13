@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 import { requireAuth } from "../../lib/auth";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 // Create a connection pool to the database
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
+
+// Helper function to generate a secure random token
+function generateSecureToken(length = 32) {
+  return crypto.randomBytes(length).toString('hex');
+}
 
 export async function GET(req: NextRequest) {
   return requireAuth(req, async (req, session) => {
@@ -22,9 +29,9 @@ export async function GET(req: NextRequest) {
       const client = await pool.connect();
 
       try {
-        // Query the brokers table
+        // Query the brokers table with updated field names
         const result = await client.query(
-          "SELECT id, name, email, company, created_at, updated_at, invitation_sent_at FROM app.brokers ORDER BY name"
+          "SELECT id, name, primary_email, owner_user_id, created_at, updated_at, invitation_sent_at FROM app.brokers ORDER BY name"
         );
 
         // Return the brokers as JSON
@@ -55,12 +62,12 @@ export async function POST(req: NextRequest) {
 
     try {
       // Parse the request body
-      const { name, email, company } = await req.json();
+      const { name, email, contactName } = await req.json();
 
       // Validate input
-      if (!name || !email || !company) {
+      if (!name || !email || !contactName) {
         return NextResponse.json(
-          { message: "Name, email, and company are required" },
+          { message: "Broker company name, email, and primary contact name are required" },
           { status: 400 }
         );
       }
@@ -69,14 +76,60 @@ export async function POST(req: NextRequest) {
       const client = await pool.connect();
 
       try {
-        // Insert the new broker
-        const result = await client.query(
-          "INSERT INTO app.brokers (name, email, company) VALUES ($1, $2, $3) RETURNING *",
-          [name, email, company]
+        // Start a transaction
+        await client.query('BEGIN');
+
+        // 1. Create a temporary random password for the broker user
+        const tempPassword = generateSecureToken(12);
+        const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+        // 2. Create a new user with the broker role
+        const userResult = await client.query(
+          "INSERT INTO app.users (email, password_hash, role) VALUES ($1, $2, $3) RETURNING id, email, role",
+          [email, passwordHash, 'broker']
         );
 
-        // Return the new broker as JSON
-        return NextResponse.json({ broker: result.rows[0] });
+        const newUser = userResult.rows[0];
+
+        // 3. Create the broker record and link it to the user
+        const brokerResult = await client.query(
+          "INSERT INTO app.brokers (name, primary_email, owner_user_id) VALUES ($1, $2, $3) RETURNING *",
+          [name, email, newUser.id]
+        );
+
+        const newBroker = brokerResult.rows[0];
+
+        // 4. Generate an invitation token that expires in 7 days
+        const token = generateSecureToken();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
+
+        // 5. Create an invitation record
+        await client.query(
+          "INSERT INTO app.user_invites (user_id, token, expires_at) VALUES ($1, $2, $3)",
+          [newUser.id, token, expiresAt]
+        );
+
+        // Commit the transaction
+        await client.query('COMMIT');
+
+        // Generate the invitation URL (in a real app, this would be your domain)
+        const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
+
+        // Return the new broker and invitation URL
+        return NextResponse.json({
+          broker: newBroker,
+          user: {
+            id: newUser.id,
+            email: newUser.email,
+            role: newUser.role
+          },
+          inviteUrl
+        });
+      } catch (error) {
+        // Rollback the transaction on error
+        await client.query('ROLLBACK');
+        throw error;
       } finally {
         // Release the client back to the pool
         client.release();
@@ -84,12 +137,20 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       console.error("Error creating broker:", error);
 
-      // Check for unique constraint violation (duplicate email)
-      if (error.code === '23505' && error.constraint === 'brokers_email_key') {
-        return NextResponse.json(
-          { message: "A broker with this email already exists" },
-          { status: 400 }
-        );
+      // Check for unique constraint violations
+      if (error.code === '23505') {
+        if (error.constraint === 'brokers_primary_email_key') {
+          return NextResponse.json(
+            { message: "A broker with this email already exists" },
+            { status: 400 }
+          );
+        }
+        if (error.constraint === 'users_email_key') {
+          return NextResponse.json(
+            { message: "A user with this email already exists" },
+            { status: 400 }
+          );
+        }
       }
 
       return NextResponse.json(

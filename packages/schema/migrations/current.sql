@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS app.brokers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    company VARCHAR(255) NOT NULL
+    primary_email VARCHAR(255) NOT NULL UNIQUE,
+    owner_user_id INTEGER REFERENCES app.users(id)
 );
 
 -- Add invitation_sent_at column to brokers table
@@ -75,5 +75,3 @@ CREATE TRIGGER set_updated_at
 BEFORE UPDATE ON app.carriers
 FOR EACH ROW
 EXECUTE FUNCTION app.set_updated_at();
-
-select 1;

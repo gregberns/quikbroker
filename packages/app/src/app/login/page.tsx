@@ -1,6 +1,6 @@
 'use client'; // Mark as a Client Component
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Use next/navigation for App Router
 
 export default function LoginPage() {
@@ -8,6 +8,32 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Check if user is already authenticated when component mounts
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/session', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated) {
+            // User is already logged in, redirect to dashboard
+            router.push('/dashboard');
+          }
+        }
+      } catch (err) {
+        console.error('Error checking auth status:', err);
+      }
+    };
+
+    checkAuthStatus();
+  }, [router]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

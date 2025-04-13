@@ -31,9 +31,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       const client = await pool.connect();
 
       try {
-        // Find the broker
+        // Find the broker with updated column names
         const result = await client.query(
-          "SELECT id, name, email, company FROM app.brokers WHERE id = $1",
+          "SELECT id, name, primary_email FROM app.brokers WHERE id = $1",
           [brokerId]
         );
 
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
         // In a real app, we would send an email to the broker here
         // For now, we'll simulate success and just log the action
-        console.log(`Invitation sent to broker: ${broker.name} (${broker.email})`);
+        console.log(`Invitation sent to broker: ${broker.name} (${broker.primary_email})`);
 
         // Update the broker record to indicate an invitation was sent
         const timestamp = new Date();
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         );
 
         return NextResponse.json({
-          message: `Invitation sent to ${broker.email}`,
+          message: `Invitation sent to ${broker.primary_email}`,
           broker: {
             ...broker,
             invitation_sent_at: timestamp
