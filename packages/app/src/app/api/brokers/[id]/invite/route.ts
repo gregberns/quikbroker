@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
 import { requireAuth } from "../../../../lib/auth";
 import crypto from "crypto";
+import { logErrorToServer } from "../../../../lib/errorHandling";
 
 // Create a connection pool to the database
 const pool = new Pool({
@@ -116,6 +117,18 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         client.release();
       }
     } catch (error) {
+      // Log the error to our error logging system
+      logErrorToServer({
+        type: 'api-error',
+        message: error instanceof Error ? error.message : 'Unknown error sending invitation',
+        stack: error instanceof Error ? error.stack : undefined,
+        url: req.url,
+        brokerId: id,
+        userId: session?.user?.id,
+        userRole: session?.role,
+        timestamp: new Date().toISOString()
+      });
+
       console.error("Error sending invitation:", error);
       return NextResponse.json(
         { message: "An error occurred while sending the invitation" },

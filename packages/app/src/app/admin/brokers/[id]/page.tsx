@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { logError } from '../../../lib/errorHandling';
+import { use } from 'react';
 
 interface Broker {
   id: number;
@@ -13,19 +15,22 @@ interface Broker {
   invitation_sent_at?: string;
 }
 
-export default function BrokerDetailsPage({ params }: { params: { id: string } }) {
+export default function BrokerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap the params Promise using React.use()
+  const unwrappedParams = use(params);
+  const brokerId = unwrappedParams.id;
+
   const [broker, setBroker] = useState<Broker | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const brokerId = params.id;
 
   // Fetch broker details from the API
   useEffect(() => {
     const fetchBrokerDetails = async () => {
       try {
         setLoading(true);
-        
+
         // For now, we'll just fetch from the brokers list API and filter
         // In a real implementation, you would have a specific endpoint for one broker
         const response = await fetch('/api/brokers');
@@ -36,15 +41,22 @@ export default function BrokerDetailsPage({ params }: { params: { id: string } }
 
         const data = await response.json();
         const foundBroker = data.brokers.find((b: Broker) => b.id === parseInt(brokerId));
-        
+
         if (!foundBroker) {
           throw new Error('Broker not found');
         }
-        
+
         setBroker(foundBroker);
       } catch (err) {
         console.error('Error fetching broker details:', err);
         setError('Failed to load broker details. Please try again later.');
+
+        // Log the error to our error logging system
+        logError(err instanceof Error ? err : new Error('Failed to fetch broker details'), {
+          page: 'admin/brokers/[id]',
+          brokerId,
+          action: 'fetchBrokerDetails'
+        });
       } finally {
         setLoading(false);
       }
@@ -55,7 +67,7 @@ export default function BrokerDetailsPage({ params }: { params: { id: string } }
 
   const handleSendInvite = async () => {
     if (!broker) return;
-    
+
     try {
       const response = await fetch(`/api/brokers/${brokerId}/invite`, {
         method: 'POST',
@@ -76,6 +88,14 @@ export default function BrokerDetailsPage({ params }: { params: { id: string } }
     } catch (err) {
       console.error('Error sending invitation:', err);
       alert('Failed to send invitation. Please try again.');
+
+      // Log the error to our error logging system
+      logError(err instanceof Error ? err : new Error('Failed to send invitation'), {
+        page: 'admin/brokers/[id]',
+        brokerId,
+        action: 'sendInvite',
+        broker: broker ? { id: broker.id, name: broker.name } : null
+      });
     }
   };
 

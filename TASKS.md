@@ -26,7 +26,7 @@ Password: admin123
 
 * Broker logs in. 
 * Enter M Number.
-* Add as vendor and send email to the default email. 
+* Add as vendor and send email to the default email.
   * Fetch all their current info. 
   * Add that carrier relation to the brokers list. 
 

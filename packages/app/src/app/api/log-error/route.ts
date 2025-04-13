@@ -10,31 +10,11 @@ export async function POST(req: NextRequest) {
   try {
     // Parse the error data from the request
     const errorData = await req.json();
-    
-    // Add server timestamp
-    const serverTimestamp = new Date().toISOString();
-    
+
     // Get a client from the pool
     const client = await pool.connect();
-    
+
     try {
-      // We'll store the error in the app_private.error_logs table
-      // If the table doesn't exist yet, we'll create it first
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS app_private.error_logs (
-          id SERIAL PRIMARY KEY,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          error_type VARCHAR(50) NOT NULL,
-          message TEXT,
-          stack TEXT,
-          component_stack TEXT,
-          url TEXT,
-          user_agent TEXT,
-          client_timestamp TIMESTAMP,
-          metadata JSONB
-        )
-      `);
-      
       // Insert the error log
       await client.query(
         `INSERT INTO app_private.error_logs 
@@ -60,16 +40,16 @@ export async function POST(req: NextRequest) {
           })
         ]
       );
-      
+
       console.error(`Error logged [${errorData.type}]: ${errorData.message}`);
-      
+
       return NextResponse.json({ success: true });
     } finally {
       client.release();
     }
   } catch (error) {
     console.error('Error while logging client error:', error);
-    
+
     return NextResponse.json(
       { success: false, message: 'Failed to log error' },
       { status: 500 }

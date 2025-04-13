@@ -10,7 +10,7 @@ export function setupGlobalErrorHandlers() {
   // Handler for unhandled errors
   const handleError = (event: ErrorEvent) => {
     event.preventDefault(); // Prevent default browser error handling
-    
+
     logErrorToServer({
       type: 'uncaught-error',
       message: event.message || 'Unknown error',
@@ -21,18 +21,18 @@ export function setupGlobalErrorHandlers() {
       url: window.location.href,
       timestamp: new Date().toISOString(),
     });
-    
+
     console.error('Uncaught error:', event.error);
   };
 
   // Handler for unhandled promise rejections
   const handleRejection = (event: PromiseRejectionEvent) => {
     event.preventDefault(); // Prevent default browser error handling
-    
+
     const reason = event.reason;
     let message = 'Promise rejected';
     let stack = '';
-    
+
     if (reason instanceof Error) {
       message = reason.message;
       stack = reason.stack || '';
@@ -41,7 +41,7 @@ export function setupGlobalErrorHandlers() {
     } else if (reason && typeof reason === 'object') {
       message = JSON.stringify(reason);
     }
-    
+
     logErrorToServer({
       type: 'unhandled-rejection',
       message,
@@ -49,7 +49,7 @@ export function setupGlobalErrorHandlers() {
       url: window.location.href,
       timestamp: new Date().toISOString(),
     });
-    
+
     console.error('Unhandled promise rejection:', reason);
   };
 
@@ -83,7 +83,7 @@ export async function logErrorToServer(errorData: Record<string, any>): Promise<
 // Export a standalone function for manual error logging
 export function logError(error: Error | string, context: Record<string, any> = {}): void {
   const errorObj = error instanceof Error ? error : new Error(error);
-  
+
   logErrorToServer({
     type: 'manual-log',
     message: errorObj.message,
