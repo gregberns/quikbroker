@@ -76,7 +76,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         }
 
         const invite = inviteResult.rows[0];
-        
+
         // Generate the invitation URL
         const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?token=${invite.token}`;
 

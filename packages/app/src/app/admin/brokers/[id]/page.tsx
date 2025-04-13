@@ -57,7 +57,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
         }
 
         setBroker(foundBroker);
-        
+
         // If the broker has an invitation sent, try to fetch the active invite link
         if (foundBroker.invitation_sent_at) {
           fetchActiveInvite(false);
@@ -82,31 +82,31 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
 
   const fetchActiveInvite = async (showWarning = true) => {
     if (!broker?.owner_user_id) return;
-    
+
     try {
       setInviteLoading(true);
       setInviteError(null);
       // Only show the warning when explicitly refreshing
       setShowNoInviteWarning(showWarning);
-      
+
       const response = await fetch(`/api/brokers/${brokerId}/active-invite`);
-      
+
       if (response.status === 404) {
         // No active invite found - this is not an error
         setActiveInvite(null);
         return;
       }
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch active invite');
       }
-      
+
       const data = await response.json();
       setActiveInvite(data);
     } catch (err) {
       console.error('Error fetching active invite:', err);
       setInviteError('Failed to load active invite link.');
-      
+
       // Log the error to our error logging system
       logError(err instanceof Error ? err : new Error('Failed to fetch active invite'), {
         page: 'admin/brokers/[id]',
@@ -138,7 +138,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
         ...broker,
         invitation_sent_at: data.broker.invitation_sent_at
       });
-      
+
       // After sending a new invite, fetch the active invite link
       fetchActiveInvite();
     } catch (err) {
@@ -157,7 +157,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
 
   const copyInviteLink = () => {
     if (!activeInvite?.inviteUrl) return;
-    
+
     navigator.clipboard.writeText(activeInvite.inviteUrl)
       .then(() => {
         setCopied(true);
@@ -238,7 +238,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
                     {broker.owner_user_id || 'Not assigned'}
                   </dd>
                 </div>
-                
+
                 {/* Active Invite Link Section */}
                 <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Active Invite Link</dt>
