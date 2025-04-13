@@ -14,6 +14,8 @@ function generateSecureToken(length = 32) {
 }
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = params; // Extract id early to avoid Next.js warning
+
   return requireAuth(req, async (req, session) => {
     // Only admins can send invitations
     if (session.role !== 'admin') {
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     try {
-      const brokerId = parseInt(params.id);
+      const brokerId = parseInt(id);
 
       if (isNaN(brokerId)) {
         return NextResponse.json(
@@ -54,6 +56,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         }
 
         const broker = brokerResult.rows[0];
+
+        // Check if owner_user_id exists
+        if (!broker.owner_user_id) {
+          return NextResponse.json(
+            { message: "Broker has no associated user. Please assign a user first." },
+            { status: 400 }
+          );
+        }
 
         // Generate a new invitation token
         const token = generateSecureToken();
