@@ -105,9 +105,20 @@ export async function POST(req: NextRequest) {
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
         // 5. Create an invitation record
-        await client.query(
-          "INSERT INTO app.user_invites (user_id, token, expires_at) VALUES ($1, $2, $3)",
+        const inviteResult = await client.query(
+          "INSERT INTO app.user_invites (user_id, token, expires_at) VALUES ($1, $2, $3) RETURNING id",
           [newUser.id, token, expiresAt]
+        );
+
+        const inviteId = inviteResult.rows[0].id;
+
+        // 6. Create a job to send the broker invitation email
+        await client.query(
+          `INSERT INTO app_private.jobs (
+            task_identifier, 
+            payload
+          ) VALUES ($1, $2)`,
+          ['broker_email_invite', JSON.stringify({ user_invite_id: inviteId })]
         );
 
         // Commit the transaction
