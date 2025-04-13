@@ -15,6 +15,11 @@ interface Broker {
   invitation_sent_at?: string;
 }
 
+interface ActiveInvite {
+  inviteUrl: string;
+  expiresAt: string;
+}
+
 export default function BrokerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap the params Promise using React.use()
   const unwrappedParams = use(params);
@@ -23,6 +28,11 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
   const [broker, setBroker] = useState<Broker | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeInvite, setActiveInvite] = useState<ActiveInvite | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [showNoInviteWarning, setShowNoInviteWarning] = useState(false);
   const router = useRouter();
 
   // Fetch broker details from the API
@@ -47,6 +57,11 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
         }
 
         setBroker(foundBroker);
+        
+        // If the broker has an invitation sent, try to fetch the active invite link
+        if (foundBroker.invitation_sent_at) {
+          fetchActiveInvite(false);
+        }
       } catch (err) {
         console.error('Error fetching broker details:', err);
         setError('Failed to load broker details. Please try again later.');
@@ -64,6 +79,44 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
 
     fetchBrokerDetails();
   }, [brokerId]);
+
+  const fetchActiveInvite = async (showWarning = true) => {
+    if (!broker?.owner_user_id) return;
+    
+    try {
+      setInviteLoading(true);
+      setInviteError(null);
+      // Only show the warning when explicitly refreshing
+      setShowNoInviteWarning(showWarning);
+      
+      const response = await fetch(`/api/brokers/${brokerId}/active-invite`);
+      
+      if (response.status === 404) {
+        // No active invite found - this is not an error
+        setActiveInvite(null);
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch active invite');
+      }
+      
+      const data = await response.json();
+      setActiveInvite(data);
+    } catch (err) {
+      console.error('Error fetching active invite:', err);
+      setInviteError('Failed to load active invite link.');
+      
+      // Log the error to our error logging system
+      logError(err instanceof Error ? err : new Error('Failed to fetch active invite'), {
+        page: 'admin/brokers/[id]',
+        brokerId,
+        action: 'fetchActiveInvite'
+      });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   const handleSendInvite = async () => {
     if (!broker) return;
@@ -85,6 +138,9 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
         ...broker,
         invitation_sent_at: data.broker.invitation_sent_at
       });
+      
+      // After sending a new invite, fetch the active invite link
+      fetchActiveInvite();
     } catch (err) {
       console.error('Error sending invitation:', err);
       alert('Failed to send invitation. Please try again.');
@@ -97,6 +153,19 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
         broker: broker ? { id: broker.id, name: broker.name } : null
       });
     }
+  };
+
+  const copyInviteLink = () => {
+    if (!activeInvite?.inviteUrl) return;
+    
+    navigator.clipboard.writeText(activeInvite.inviteUrl)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy invite link:', err);
+      });
   };
 
   const formatDate = (dateString?: string) => {
@@ -169,19 +238,72 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
                     {broker.owner_user_id || 'Not assigned'}
                   </dd>
                 </div>
+                
+                {/* Active Invite Link Section */}
                 <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt className="text-sm font-medium text-gray-500">Active Invite Link</dt>
+                  <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                    {inviteLoading ? (
+                      <p className="text-gray-500">Loading invite link...</p>
+                    ) : inviteError ? (
+                      <div className="text-red-500">{inviteError}</div>
+                    ) : activeInvite ? (
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center">
+                          <input
+                            type="text"
+                            readOnly
+                            value={activeInvite.inviteUrl}
+                            className="w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                          />
+                          <button
+                            onClick={copyInviteLink}
+                            className="ml-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                          >
+                            {copied ? 'Copied!' : 'Copy'}
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          Expires: {formatDate(activeInvite.expiresAt)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          This link can be sent to the broker to verify their email and gain access to the platform.
+                        </p>
+                      </div>
+                    ) : broker.invitation_sent_at ? (
+                      <div className="flex flex-col space-y-2">
+                        {showNoInviteWarning && (
+                          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded-md">
+                            <p className="font-medium">No active invite found for this broker.</p>
+                            <p className="text-xs mt-1">The invitation may have expired. Click "Send Invite" to generate a new invitation.</p>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => fetchActiveInvite(true)}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 text-sm w-fit"
+                        >
+                          Refresh Invite Status
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500">No invitation has been sent yet. Use the "Send Invite" button to create an invitation.</p>
+                    )}
+                  </dd>
+                </div>
+
+                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Created At</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                     {formatDate(broker.created_at)}
                   </dd>
                 </div>
-                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Updated At</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                     {formatDate(broker.updated_at)}
                   </dd>
                 </div>
-                <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Invitation Sent At</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                     {formatDate(broker.invitation_sent_at)}
