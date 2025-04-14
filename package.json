@@ -10,6 +10,8 @@
     ]
   },
   "scripts": {
+    "start": "yarn workspace @quikbroker/app start",
+    "build": "yarn workspace @quikbroker/app build",
     "app:dev": "dotenv -f .env yarn workspace @quikbroker/app dev",
     "app:build": "dotenv -f .env yarn workspace @quikbroker/app build",
     "app:start": "dotenv -f .env yarn workspace @quikbroker/app start",

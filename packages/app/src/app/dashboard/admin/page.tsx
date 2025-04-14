@@ -27,9 +27,8 @@ export default function AdminHome() {
 
         const data = await response.json();
         setUser(data.user);
-      } catch (err) {
-        // Redirect to login if not authenticated
-        router.push('/login');
+      } catch {
+        setError('Failed to fetch admin data');
       } finally {
         setLoading(false);
       }
@@ -90,8 +89,8 @@ export default function AdminHome() {
 
       // Redirect to the broker's admin page
       router.push(`/dashboard/admin/brokers/${newBrokerData.broker.id}`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add broker');
     } finally {
       setIsLoading(false);
     }
@@ -193,7 +192,7 @@ export default function AdminHome() {
               </div>
               <div>
                 <label htmlFor="contactName" className="block text-sm font-medium text-gray-800 mb-1">
-                  Contact's Name
+                  Contact&apos;s Name
                 </label>
                 <input
                   type="text"
@@ -205,21 +204,19 @@ export default function AdminHome() {
                   disabled={isLoading}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && (
+                <div className="text-red-600 text-sm">{error}</div>
+              )}
               <button
                 type="submit"
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50"
                 disabled={isLoading}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Adding...' : 'Add Broker'}
               </button>
             </form>
           </div>
         </div>
-
-        <footer className="mt-8 mb-6 text-sm text-gray-700">
-          &copy; 2025 QuikBroker. All rights reserved.
-        </footer>
       </div>
     </div>
   );

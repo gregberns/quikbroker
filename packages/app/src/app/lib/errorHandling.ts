@@ -65,7 +65,7 @@ export function setupGlobalErrorHandlers() {
 }
 
 // Helper function to log errors to the server
-export async function logErrorToServer(errorData: Record<string, any>): Promise<void> {
+export async function logErrorToServer(errorData: Record<string, unknown>): Promise<void> {
   try {
     await fetch('/api/log-error', {
       method: 'POST',
@@ -81,7 +81,7 @@ export async function logErrorToServer(errorData: Record<string, any>): Promise<
 }
 
 // Export a standalone function for manual error logging
-export function logError(error: Error | string, context: Record<string, any> = {}): void {
+export function logError(error: Error | string, context: Record<string, unknown> = {}): void {
   const errorObj = error instanceof Error ? error : new Error(error);
 
   logErrorToServer({
@@ -92,4 +92,31 @@ export function logError(error: Error | string, context: Record<string, any> = {
     url: typeof window !== 'undefined' ? window.location.href : undefined,
     timestamp: new Date().toISOString(),
   });
+}
+
+export interface ApiError {
+  message: string;
+  status?: number;
+}
+
+export function handleApiError(error: unknown): ApiError {
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      status: 500
+    };
+  }
+  return {
+    message: 'An unexpected error occurred',
+    status: 500
+  };
+}
+
+export function isApiError(error: unknown): error is ApiError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as ApiError).message === 'string'
+  );
 }

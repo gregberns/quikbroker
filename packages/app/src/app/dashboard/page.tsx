@@ -33,7 +33,7 @@ export default function DashboardPage() {
               router.push('/login');
           }
         }
-      } catch (err) {
+      } catch {
         router.push('/login');
       }
     };

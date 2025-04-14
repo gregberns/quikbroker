@@ -34,15 +34,15 @@ export async function getAuthSession() {
     }
 
     return JSON.parse(sessionCookie.value);
-  } catch (error) {
-    console.error("Error parsing session:", error);
+  } catch (error: unknown) {
+    console.error('Error in getAuthSession:', error);
     return null;
   }
 }
 
 export async function requireAuth(
   req: NextRequest,
-  handler: (req: NextRequest, session: any) => Promise<NextResponse>,
+  handler: (req: NextRequest, session: { id: number; email: string; role: string }) => Promise<NextResponse>,
   options: { requiredRole?: string } = {}
 ) {
   // Get the session

@@ -11,7 +11,7 @@ interface BrokerData {
 }
 
 export default function BrokerDashboard() {
-  const params = useParams();
+  const { brokerId } = useParams();
   const [broker, setBroker] = useState<BrokerData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,8 +24,8 @@ export default function BrokerDashboard() {
         }
         const data = await response.json();
         setBroker(data.user);
-      } catch (err) {
-        console.error('Error fetching broker data:', err);
+      } catch (_err) {
+        console.error('Error fetching broker data:', _err);
       } finally {
         setLoading(false);
       }
@@ -58,7 +58,7 @@ export default function BrokerDashboard() {
               <h2 className="text-lg font-semibold text-blue-900 mb-2">Your Carriers</h2>
               <p className="text-blue-700 mb-4">View and manage your network of carriers</p>
               <button
-                onClick={() => window.location.href = `/dashboard/brokers/${broker.id}/carriers`}
+                onClick={() => window.location.href = `/dashboard/brokers/${brokerId}/carriers`}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
               >
                 View Carriers
@@ -69,7 +69,7 @@ export default function BrokerDashboard() {
               <h2 className="text-lg font-semibold text-green-900 mb-2">Transportation Requests</h2>
               <p className="text-green-700 mb-4">Manage your active transportation requests</p>
               <button
-                onClick={() => window.location.href = `/dashboard/brokers/${broker.id}/requests`}
+                onClick={() => window.location.href = `/dashboard/brokers/${brokerId}/requests`}
                 className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
               >
                 View Requests

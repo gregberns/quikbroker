@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { logError } from '../../../../lib/errorHandling';
 import { use } from 'react';
@@ -34,6 +34,44 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
   const [copied, setCopied] = useState(false);
   const [showNoInviteWarning, setShowNoInviteWarning] = useState(false);
   const router = useRouter();
+
+  const fetchActiveInvite = useCallback(async (showWarning = true) => {
+    if (!broker?.owner_user_id) return;
+
+    try {
+      setInviteLoading(true);
+      setInviteError(null);
+      // Only show the warning when explicitly refreshing
+      setShowNoInviteWarning(showWarning);
+
+      const response = await fetch(`/api/brokers/${brokerId}/active-invite`);
+
+      if (response.status === 404) {
+        // No active invite found - this is not an error
+        setActiveInvite(null);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch active invite');
+      }
+
+      const data = await response.json();
+      setActiveInvite(data);
+    } catch (err) {
+      console.error('Error fetching active invite:', err);
+      setInviteError('Failed to load active invite link.');
+
+      // Log the error to our error logging system
+      logError(err instanceof Error ? err : new Error('Failed to fetch active invite'), {
+        page: 'admin/brokers/[id]',
+        brokerId,
+        action: 'fetchActiveInvite'
+      });
+    } finally {
+      setInviteLoading(false);
+    }
+  }, [broker?.owner_user_id, brokerId]);
 
   // Fetch broker details from the API
   useEffect(() => {
@@ -78,45 +116,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
     };
 
     fetchBrokerDetails();
-  }, [brokerId]);
-
-  const fetchActiveInvite = async (showWarning = true) => {
-    if (!broker?.owner_user_id) return;
-
-    try {
-      setInviteLoading(true);
-      setInviteError(null);
-      // Only show the warning when explicitly refreshing
-      setShowNoInviteWarning(showWarning);
-
-      const response = await fetch(`/api/brokers/${brokerId}/active-invite`);
-
-      if (response.status === 404) {
-        // No active invite found - this is not an error
-        setActiveInvite(null);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch active invite');
-      }
-
-      const data = await response.json();
-      setActiveInvite(data);
-    } catch (err) {
-      console.error('Error fetching active invite:', err);
-      setInviteError('Failed to load active invite link.');
-
-      // Log the error to our error logging system
-      logError(err instanceof Error ? err : new Error('Failed to fetch active invite'), {
-        page: 'admin/brokers/[id]',
-        brokerId,
-        action: 'fetchActiveInvite'
-      });
-    } finally {
-      setInviteLoading(false);
-    }
-  };
+  }, [brokerId, fetchActiveInvite]);
 
   const handleSendInvite = async () => {
     if (!broker) return;
@@ -275,7 +275,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
                         {showNoInviteWarning && (
                           <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2 rounded-md">
                             <p className="font-medium">No active invite found for this broker.</p>
-                            <p className="text-xs mt-1">The invitation may have expired. Click "Send Invite" to generate a new invitation.</p>
+                            <p className="text-xs mt-1">The invitation may have expired. Click &quot;Send Invite&quot; to generate a new invitation.</p>
                           </div>
                         )}
                         <button
@@ -286,7 +286,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
                         </button>
                       </div>
                     ) : (
-                      <p className="text-gray-500">No invitation has been sent yet. Use the "Send Invite" button to create an invitation.</p>
+                      <p className="text-gray-500">No invitation has been sent yet. Use the &quot;Send Invite&quot; button to create an invitation.</p>
                     )}
                   </dd>
                 </div>

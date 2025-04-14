@@ -37,5 +37,9 @@ FROM base
 # Copy built application
 COPY --from=build /app /app
 
+RUN yarn install --production=true
+
+# RUN yarn run build
+
 # Start the server by default, this can be overwritten at runtime
 CMD [ "yarn", "run", "start" ]

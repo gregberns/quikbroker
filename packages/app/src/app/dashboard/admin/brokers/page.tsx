@@ -40,7 +40,7 @@ export default function AdminBrokersPage() {
 
         const data = await response.json();
         setBrokers(data.brokers);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error fetching brokers:', err);
         setError('Failed to load brokers. Please try again later.');
       } finally {
@@ -78,9 +78,9 @@ export default function AdminBrokersPage() {
       // Close the modal and reset the form
       setShowAddBrokerModal(false);
       setNewBroker({ name: '', email: '', contactName: '' });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error adding broker:', err);
-      setAddBrokerError(err.message || 'Failed to add broker. Please try again.');
+      setAddBrokerError(err instanceof Error ? err.message : 'Failed to add broker. Please try again.');
     } finally {
       setAddingBroker(false);
     }
@@ -105,7 +105,7 @@ export default function AdminBrokersPage() {
           ? { ...broker, invitation_sent_at: data.broker.invitation_sent_at }
           : broker
       ));
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error sending invitation:', err);
       alert('Failed to send invitation. Please try again.');
     }
