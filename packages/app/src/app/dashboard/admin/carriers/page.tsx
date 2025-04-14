@@ -83,8 +83,11 @@ export default function AdminCarriersPage() {
       setShowAddCarrierModal(false);
       setNewCarrier({ name: '', email: '', company: '', phone: '', address: '' });
     } catch (err) {
-      console.error('Error adding carrier:', err);
-      setAddCarrierError(err.message || 'Failed to add carrier. Please try again.');
+      if (err instanceof Error) {
+        setAddCarrierError(err.message || 'Failed to add carrier. Please try again.');
+      } else {
+        setAddCarrierError('Failed to add carrier. Please try again.');
+      }
     } finally {
       setAddingCarrier(false);
     }

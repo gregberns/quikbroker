@@ -7,7 +7,10 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // Await the params Promise before destructuring
+  const { id } = await params;
+
   return requireAuth(req, async (req, session) => {
     // Only admins can send invitations
     if (session.role !== 'admin') {
@@ -18,7 +21,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     try {
-      const carrierId = parseInt(params.id);
+      const carrierId = parseInt(id);
 
       if (isNaN(carrierId)) {
         return NextResponse.json(

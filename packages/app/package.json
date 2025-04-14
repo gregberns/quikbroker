@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "node server.js",
-    "lint": "next lint"
+    "lint": "next lint && npx tsc --noEmit"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.2",

@@ -82,16 +82,15 @@ export async function POST(req: NextRequest) {
         client.release();
       }
     } catch (error) {
-      console.error("Error creating carrier:", error);
-
-      // Check for unique constraint violation (duplicate email)
-      if (error.code === '23505' && error.constraint === 'carriers_email_key') {
+      // Check for unique constraint violations
+      if (error instanceof Error && 'code' in error && error.code === '23505' && 'constraint' in error && error.constraint === 'carriers_email_key') {
         return NextResponse.json(
           { message: "A carrier with this email already exists" },
-          { status: 400 }
+          { status: 409 }
         );
       }
 
+      console.error("Error creating carrier:", error);
       return NextResponse.json(
         { message: "An error occurred while creating the carrier" },
         { status: 500 }

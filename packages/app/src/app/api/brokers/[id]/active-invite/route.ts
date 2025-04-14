@@ -96,7 +96,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         stack: error instanceof Error ? error.stack : undefined,
         url: req.url,
         brokerId: id,
-        userId: session?.user?.id,
+        userId: session?.id,
         userRole: session?.role,
         timestamp: new Date().toISOString()
       });

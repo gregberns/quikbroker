@@ -146,24 +146,26 @@ export async function POST(req: NextRequest) {
         client.release();
       }
     } catch (error) {
-      console.error("Error creating broker:", error);
-
       // Check for unique constraint violations
-      if (error.code === '23505') {
-        if (error.constraint === 'brokers_primary_email_key') {
+      if (error instanceof Error && 'code' in error && error.code === '23505') {
+        if ('constraint' in error && error.constraint === 'brokers_primary_email_key') {
           return NextResponse.json(
             { message: "A broker with this email already exists" },
-            { status: 400 }
-          );
-        }
-        if (error.constraint === 'users_email_key') {
-          return NextResponse.json(
-            { message: "A user with this email already exists" },
-            { status: 400 }
+            { status: 409 }
           );
         }
       }
 
+      if (error instanceof Error && 'code' in error && error.code === '23505') {
+        if ('constraint' in error && error.constraint === 'users_email_key') {
+          return NextResponse.json(
+            { message: "A user with this email already exists" },
+            { status: 409 }
+          );
+        }
+      }
+
+      console.error("Error creating broker:", error);
       return NextResponse.json(
         { message: "An error occurred while creating the broker" },
         { status: 500 }
