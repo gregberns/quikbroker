@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { logError } from '../../../../lib/errorHandling';
 import { use } from 'react';
 
@@ -178,7 +179,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
       <header className="bg-white shadow">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <button
-            onClick={() => router.push('/admin/brokers')}
+            onClick={() => router.push('/admin/brokers' as Route)}
             className="text-gray-600 hover:text-gray-900 mb-4 inline-flex items-center"
           >
             &larr; Back to Brokers

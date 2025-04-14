@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Route } from 'next';
 
 interface Carrier {
   id: number;
@@ -183,7 +184,7 @@ export default function AdminCarriersPage() {
                         Send Invite
                       </button>
                       <button
-                        onClick={() => router.push(`/admin/carriers/${carrier.id}`)}
+                        onClick={() => router.push(`/admin/carriers/${carrier.id}` as Route)}
                         className="text-blue-600 hover:text-blue-900 mr-4"
                       >
                         View
