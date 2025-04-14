@@ -5,15 +5,13 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "node server.js",
+    "start": "next build &&node server.js",
     "lint": "next lint && npx tsc --noEmit"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.2",
-    "@types/pg": "^8.11.12",
     "bcrypt": "^5.1.1",
     "next": "15.3.0",
-    "pg": "^8.14.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

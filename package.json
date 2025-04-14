@@ -21,6 +21,10 @@
     "schema:migrate": "dotenv -f .env yarn workspace @quikbroker/schema migrate",
     "schema:rollback": "dotenv -f .env yarn workspace @quikbroker/schema rollback"
   },
+  "dependencies": {
+    "@types/pg": "^8.11.12",
+    "pg": "^8.14.1"
+  },
   "devDependencies": {
     "dotenv": "^16.0.0",
     "dotenv-cli": "^8.0.0"
