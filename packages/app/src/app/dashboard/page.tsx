@@ -12,13 +12,29 @@ export default function DashboardPage() {
     const fetchUserData = async () => {
       try {
         const response = await fetch('/api/me');
-        
+
         if (!response.ok) {
           throw new Error('Not authenticated');
         }
-        
+
         const data = await response.json();
         setUser(data.user);
+
+        // Redirect based on user role
+        if (data.user) {
+          switch (data.user.role) {
+            case 'admin':
+              router.push('/dashboard/admin');
+              return;
+            case 'broker':
+              router.push('/dashboard/brokers');
+              return;
+            case 'carrier':
+              // Future implementation for carriers
+              // For now, they'll see the default dashboard
+              break;
+          }
+        }
       } catch (err) {
         // Redirect to login if not authenticated
         router.push('/login');
@@ -35,15 +51,16 @@ export default function DashboardPage() {
   }
 
   // Role-specific dashboard content
+  // This is only shown if the redirect doesn't happen for some reason
   const renderRoleSpecificContent = () => {
-    switch(user?.role) {
+    switch (user?.role) {
       case 'admin':
         return (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Admin Dashboard</h2>
               <p className="mb-4">Welcome to the administrative dashboard. From here you can manage brokers and carriers.</p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
                   <h3 className="text-lg font-medium mb-2">Manage Brokers</h3>
@@ -55,7 +72,7 @@ export default function DashboardPage() {
                     Broker Management
                   </button>
                 </div>
-                
+
                 <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
                   <h3 className="text-lg font-medium mb-2">Manage Carriers</h3>
                   <p className="text-gray-600 mb-3">View and manage carriers in the system.</p>
@@ -68,21 +85,21 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
               <p className="text-gray-500 italic">No recent activities to display.</p>
             </div>
           </div>
         );
-        
+
       case 'broker':
         return (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Broker Dashboard</h2>
               <p className="mb-4">Welcome to your broker dashboard. Manage your carriers and transportation requests here.</p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
                   <h3 className="text-lg font-medium mb-2">Your Carriers</h3>
@@ -94,7 +111,7 @@ export default function DashboardPage() {
                     Manage Carriers
                   </button>
                 </div>
-                
+
                 <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
                   <h3 className="text-lg font-medium mb-2">Add New Carrier</h3>
                   <p className="text-gray-600 mb-3">Add a new carrier to your network.</p>
@@ -107,21 +124,21 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
               <p className="text-gray-500 italic">No recent activities to display.</p>
             </div>
           </div>
         );
-        
+
       case 'carrier':
         return (
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Carrier Dashboard</h2>
               <p className="mb-4">Welcome to your carrier dashboard. View and respond to requests from brokers here.</p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
                   <h3 className="text-lg font-medium mb-2">Broker Requests</h3>
@@ -133,7 +150,7 @@ export default function DashboardPage() {
                     View Requests
                   </button>
                 </div>
-                
+
                 <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
                   <h3 className="text-lg font-medium mb-2">Your Brokers</h3>
                   <p className="text-gray-600 mb-3">View brokers you're working with.</p>
@@ -146,14 +163,14 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
               <p className="text-gray-500 italic">No recent activities to display.</p>
             </div>
           </div>
         );
-        
+
       default:
         return (
           <div className="bg-white p-6 rounded-lg shadow">
@@ -169,13 +186,13 @@ export default function DashboardPage() {
       <header className="bg-white shadow">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            {user?.role === 'admin' ? 'Admin Dashboard' : 
-             user?.role === 'broker' ? 'Broker Dashboard' : 
-             user?.role === 'carrier' ? 'Carrier Dashboard' : 'Dashboard'}
+            {user?.role === 'admin' ? 'Admin Dashboard' :
+              user?.role === 'broker' ? 'Broker Dashboard' :
+                user?.role === 'carrier' ? 'Carrier Dashboard' : 'Dashboard'}
           </h1>
           <div className="flex items-center gap-4">
             <span className="text-gray-600">{user?.email}</span>
-            <button 
+            <button
               onClick={() => {
                 // Simple logout - in a real app, call an API to invalidate the session
                 document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -188,11 +205,11 @@ export default function DashboardPage() {
           </div>
         </div>
       </header>
-      
+
       <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 sm:px-6 lg:px-8">
         {renderRoleSpecificContent()}
       </main>
-      
+
       <footer className="bg-white border-t border-gray-200 py-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-gray-500">
           &copy; 2025 QuikBroker. All rights reserved.

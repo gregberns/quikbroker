@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Pool } from "pg";
-import { hashPassword } from "../../lib/auth";
+import { hashPassword } from "../../../lib/auth";
 
 // Create a connection pool to the database
 const pool = new Pool({

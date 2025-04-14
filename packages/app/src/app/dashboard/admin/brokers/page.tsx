@@ -40,7 +40,7 @@ export default function AdminBrokersPage() {
 
         const data = await response.json();
         setBrokers(data.brokers);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching brokers:', err);
         setError('Failed to load brokers. Please try again later.');
       } finally {
@@ -78,7 +78,7 @@ export default function AdminBrokersPage() {
       // Close the modal and reset the form
       setShowAddBrokerModal(false);
       setNewBroker({ name: '', email: '', contactName: '' });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error adding broker:', err);
       setAddBrokerError(err.message || 'Failed to add broker. Please try again.');
     } finally {
@@ -105,7 +105,7 @@ export default function AdminBrokersPage() {
           ? { ...broker, invitation_sent_at: data.broker.invitation_sent_at }
           : broker
       ));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error sending invitation:', err);
       alert('Failed to send invitation. Please try again.');
     }
@@ -162,7 +162,14 @@ export default function AdminBrokersPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {brokers.map((broker) => (
                   <tr key={broker.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{broker.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <button
+                        onClick={() => router.push(`/dashboard/admin/brokers/${broker.id}`)}
+                        className="text-gray-900 hover:text-blue-600 hover:underline"
+                      >
+                        {broker.name}
+                      </button>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{broker.primary_email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -172,7 +179,7 @@ export default function AdminBrokersPage() {
                         Send Invite
                       </button>
                       <button
-                        onClick={() => router.push(`/admin/brokers/${broker.id}`)}
+                        onClick={() => router.push(`/dashboard/admin/brokers/${broker.id}`)}
                         className="text-blue-600 hover:text-blue-900 mr-4"
                       >
                         View
