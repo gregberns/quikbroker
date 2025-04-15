@@ -7,7 +7,7 @@ app = 'quikbroker'
 primary_region = 'lax'
 
 [build]
-  image = "ghcr.io/gregberns/quikbroker/app:latest"
+  image = "registry.fly.io/quikbroker:latest"
 
 [env]
   PORT = '8080'
