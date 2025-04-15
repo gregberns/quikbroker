@@ -36,9 +36,9 @@ COPY packages/app/ ./packages/app/
 # RUN yarn install --production=false
 RUN yarn install --production --pure-lockfile --non-interactive --cache-folder ./ycache; rm -rf ./ycache
 
-RUN ls -la ./
-RUN ls -la ./packages/app/
-RUN ls -la ./packages/app/src/app
+# RUN ls -la ./
+# RUN ls -la ./packages/app/
+# RUN ls -la ./packages/app/src/app
 
 # Build the app
 RUN cd packages/app && yarn build

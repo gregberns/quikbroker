@@ -8,6 +8,9 @@ primary_region = 'lax'
 
 [build]
 
+[deploy]
+  image = "ghcr.io/gregberns/quikbroker/app:latest"
+
 [env]
   PORT = '8080'
 
