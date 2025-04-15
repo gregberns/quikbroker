@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build and Deploy
 
 on:
   push:
@@ -8,10 +8,12 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  FLY_REGISTRY: registry.fly.io
   IMAGE_NAME: ${{ github.repository }}
+  FLY_APP: quikbroker
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,12 +36,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to the Container registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Fly.io Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.FLY_REGISTRY }}
+          username: ${{ secrets.FLY_API_TOKEN }}
+          password: x
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -47,6 +56,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}
           tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
@@ -56,8 +66,9 @@ jobs:
             org.opencontainers.image.title=${{ matrix.image }}
             org.opencontainers.image.description=${{ matrix.image }} image for QuikBroker
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.visibility=private
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image to GitHub Registry
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -66,16 +77,28 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:buildcache,mode=max 
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:buildcache,mode=max
 
-  deploy:
-    name: Deploy app
-    runs-on: ubuntu-latest
-    concurrency: deploy-group    # optional: ensure only one action runs at a time
-    steps:
-      - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tag and push to Fly.io Registry
+        run: |
+          # Get the latest tag from the metadata
+          LATEST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
+          
+          # Pull the image from GitHub Registry
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$LATEST_TAG
+          
+          # Tag for Fly.io Registry
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$LATEST_TAG ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG
+          
+          # Push to Fly.io Registry
+          docker push ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG
+
+      - name: Deploy to Fly.io
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Install flyctl
+          curl -L https://fly.io/install.sh | sh
+          
+          # Deploy using the image we just pushed
+          LATEST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
+          flyctl deploy --image ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG --app ${{ env.FLY_APP }}
