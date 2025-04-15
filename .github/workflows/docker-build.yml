@@ -69,6 +69,7 @@ jobs:
             org.opencontainers.image.visibility=private
 
       - name: Build and push Docker image to GitHub Registry
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -79,21 +80,34 @@ jobs:
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:buildcache,mode=max
 
+      - name: Debug metadata output
+        run: |
+          echo "All tags: ${{ steps.meta.outputs.tags }}"
+          echo "All labels: ${{ steps.meta.outputs.labels }}"
+
+      - name: Set image tag
+        id: set-tag
+        run: |
+          # Try to get the latest tag, fall back to the first tag if not found
+          if [[ "${{ steps.meta.outputs.tags }}" == *"latest"* ]]; then
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          else
+            # Get the first tag from the comma-separated list
+            FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | cut -d',' -f1)
+            echo "IMAGE_TAG=$FIRST_TAG" >> $GITHUB_ENV
+          fi
+          echo "Using image tag: $IMAGE_TAG"
+
       - name: Tag and push to Fly.io Registry
         run: |
-          # Get the latest tag from the metadata
-          LATEST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
+          echo "Pulling image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$IMAGE_TAG"
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$IMAGE_TAG
           
-          # Pull the image from GitHub Registry
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$LATEST_TAG
+          echo "Tagging for Fly.io: ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG"
+          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$IMAGE_TAG ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG
           
-          # Tag for Fly.io Registry
-          docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$LATEST_TAG ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG
-          
-          echo "Pushing to Fly.io Registry line:" ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG
-
-          # Push to Fly.io Registry
-          docker push ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG
+          echo "Pushing to Fly.io Registry: ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG"
+          docker push ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG
 
       - name: Deploy to Fly.io
         if: github.ref == 'refs/heads/main'
@@ -101,6 +115,5 @@ jobs:
           # Install flyctl
           curl -L https://fly.io/install.sh | sh
           
-          # Deploy using the image we just pushed
-          LATEST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
-          flyctl deploy --image ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG --app ${{ env.FLY_APP }}
+          echo "Deploying with image: ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG"
+          flyctl deploy --image ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG --app ${{ env.FLY_APP }}
