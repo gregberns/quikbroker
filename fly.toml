@@ -7,8 +7,6 @@ app = 'quikbroker'
 primary_region = 'lax'
 
 [build]
-
-[deploy]
   image = "ghcr.io/gregberns/quikbroker/app:latest"
 
 [env]
