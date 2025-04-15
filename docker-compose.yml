@@ -11,18 +11,6 @@ services:
     volumes:
       - ./db_data:/var/lib/postgresql/data
 
-  db-shadow:
-    image: postgres:16
-    restart: always
-    environment:
-      POSTGRES_USER: db_user
-      POSTGRES_PASSWORD: db_password
-      POSTGRES_DB: db_name
-    ports:
-      - "6001:5432"
-    volumes:
-      - ./db_data_shadow:/var/lib/postgresql/data
-
   app:
     build:
       context: .
@@ -34,3 +22,6 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=8080
+      # - DATABASE_URL=postgres://db_user:db_password@db:5432/db_name
+    depends_on:
+      - db
