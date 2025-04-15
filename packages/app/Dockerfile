@@ -27,33 +27,40 @@ RUN addgroup --system --gid 1001 nodejs && \
 FROM base AS builder
 WORKDIR /app
 
-# Copy root package files
-COPY package.json yarn.lock ./
 
-# Copy the app package
-COPY packages/app ./packages/app
+# Copy package files
+COPY package.json yarn.lock ./
+COPY packages/app/ ./packages/app/
 
 # Set up workspace and install dependencies
-RUN cd packages/app && yarn install --production=false
+# RUN yarn install --production=false
+RUN yarn install --production --pure-lockfile --non-interactive --cache-folder ./ycache; rm -rf ./ycache
+
+RUN ls -la ./
+RUN ls -la ./packages/app/
+RUN ls -la ./packages/app/src/app
 
 # Build the app
-WORKDIR /app/packages/app
-RUN yarn build
+RUN cd packages/app && yarn build
 
 # Runner stage
 FROM base AS runner
 WORKDIR /app
 
 # Copy necessary files from builder
-COPY --from=builder --chown=nextjs:nodejs /app/packages/app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/packages/app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/packages/app/.next/static ./.next/static
+# COPY --from=builder --chown=nextjs:nodejs /app/packages/app/.next/standalone ./
+# COPY --from=builder --chown=nextjs:nodejs /app/packages/app/.next/static ./.next/static
+# COPY --from=builder --chown=nextjs:nodejs /app/packages/app/public ./public
+
+COPY --from=builder --chown=nextjs:nodejs /app/ ./
 
 # Set user
 USER nextjs
 
 # Expose port
-EXPOSE 8080
+# EXPOSE 8080
+
+WORKDIR /app/packages/app
 
 # Start the server
-CMD ["node", "/app/packages/app/server.js"]
+CMD ["node", "./server.js"]
