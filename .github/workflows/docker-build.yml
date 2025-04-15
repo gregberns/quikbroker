@@ -82,7 +82,7 @@ jobs:
       - name: Tag and push to Fly.io Registry
         run: |
           # Get the latest tag from the metadata
-          LATEST_TAG=latest  # $(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
+          LATEST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
           
           # Pull the image from GitHub Registry
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.image }}:$LATEST_TAG
@@ -102,5 +102,5 @@ jobs:
           curl -L https://fly.io/install.sh | sh
           
           # Deploy using the image we just pushed
-          LATEST_TAG=latest  # $(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
+          LATEST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | grep 'latest' || echo "${{ steps.meta.outputs.tags }}" | tr ',' '\n' | head -n1)
           flyctl deploy --image ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$LATEST_TAG --app ${{ env.FLY_APP }}
