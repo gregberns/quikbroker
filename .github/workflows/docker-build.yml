@@ -124,7 +124,6 @@ jobs:
           FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-
           flyctl apps list
 
           echo "LIST RETRIEVED"
