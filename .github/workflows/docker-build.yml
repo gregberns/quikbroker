@@ -117,7 +117,7 @@ jobs:
 
       # Run schema migrations
       - name: Run Schema Migrations
-        uses: superfly/flyctl-actions/setup-flyctl@master
+        # uses: superfly/flyctl-actions/setup-flyctl@master
         with:
           app: ${{ env.FLY_APP }}
         env:
