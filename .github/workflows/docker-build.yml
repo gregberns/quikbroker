@@ -118,7 +118,8 @@ jobs:
       # Run schema migrations
       - name: Run Schema Migrations
         run: |
-          flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} > /dev/null 2>&1 &
+          # flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} > /dev/null 2>&1 &
+          flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} &
           sleep 20  # Wait for proxy to initialize
           
           # Run the Schema Migration using the local image
