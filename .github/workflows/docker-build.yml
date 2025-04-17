@@ -123,12 +123,8 @@ jobs:
         env:
           FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # env:
-        #   FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
 
-          # export FLY_ACCESS_TOKEN='${{ secrets.FLY_API_TOKEN }}'
-          
           flyctl apps list
 
           echo "LIST RETRIEVED"
@@ -148,7 +144,10 @@ jobs:
           echo "AFTER SLEEP 2"
 
           # Run the Schema Migration using the local image
-          docker run --rm -p 5432:5432 schema-migrations:latest
+          # docker run --rm -p 5432:5432 schema-migrations:latest
+          
+          yarn schema:migrate
+          
           EXIT_CODE=$?
           if [ $EXIT_CODE -ne 0 ]; then
             echo "Schema migrations failed with exit code $EXIT_CODE"

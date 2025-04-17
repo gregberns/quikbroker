@@ -12,7 +12,7 @@ ENV PORT=8080
 
 # Install system dependencies
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential && \
+    apt-get install -y python-is-python3 pkg-config build-essential postgresql-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -30,15 +30,13 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json yarn.lock ./
-COPY packages/app/ ./packages/app/
+COPY packages/app/package.json ./packages/app/package.json
 
 # Set up workspace and install dependencies
 # RUN yarn install --production=false
 RUN yarn install --production --pure-lockfile --non-interactive --cache-folder ./ycache; rm -rf ./ycache
 
-# RUN ls -la ./
-# RUN ls -la ./packages/app/
-# RUN ls -la ./packages/app/src/app
+COPY packages/app/ ./packages/app/
 
 # Build the app
 RUN cd packages/app && yarn build
@@ -47,20 +45,16 @@ RUN cd packages/app && yarn build
 FROM base AS runner
 WORKDIR /app
 
-# Copy necessary files from builder
-# COPY --from=builder --chown=nextjs:nodejs /app/packages/app/.next/standalone ./
-# COPY --from=builder --chown=nextjs:nodejs /app/packages/app/.next/static ./.next/static
-# COPY --from=builder --chown=nextjs:nodejs /app/packages/app/public ./public
-
 COPY --from=builder --chown=nextjs:nodejs /app/ ./
 
-# Set user
-USER nextjs
+# USER root
+# RUN corepack disable
+# # Set user
 
-# Expose port
-# EXPOSE 8080
+USER nextjs
 
 WORKDIR /app/packages/app
 
 # Start the server
 CMD ["node", "./server.js"]
+# ENTRYPOINT ["./docker-entrypoint.sh"]
