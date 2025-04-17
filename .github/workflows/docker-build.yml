@@ -11,6 +11,7 @@ env:
   FLY_REGISTRY: registry.fly.io
   IMAGE_NAME: ${{ github.repository }}
   FLY_APP: quikbroker
+  FLY_APP_DB: quikbroker-db
 
 jobs:
   build-and-deploy:
@@ -117,8 +118,8 @@ jobs:
       # Run schema migrations
       - name: Run Schema Migrations
         run: |
-          flyctl proxy 5432 -a ${{ env.FLY_APP }} > /dev/null 2>&1 &
-          sleep 5  # Wait for proxy to initialize
+          flyctl proxy 5432 -a ${{ env.FLY_APP_DB }} > /dev/null 2>&1 &
+          sleep 10  # Wait for proxy to initialize
           
           # Run the Schema Migration using the local image
           docker run --rm schema-migrations:latest
