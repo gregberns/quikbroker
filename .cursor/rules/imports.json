@@ -1,0 +1,26 @@
+{
+  "importOrder": [
+    "^react$",
+    "^next/(.*)$",
+    "^@quikbroker/(.*)$",
+    "^[./]"
+  ],
+  "importGrouping": {
+    "newlineBetweenGroups": true,
+    "hoistSpecifiers": true
+  },
+  "rules": {
+    "no-default-export": {
+      "severity": "off",
+      "description": "Default exports are allowed",
+      "exceptions": [
+        "packages/app/src/pages/**"
+      ]
+    },
+    "no-relative-parent-imports": {
+      "severity": "warning",
+      "description": "Prefer absolute imports over relative parent imports (../../)",
+      "exceptions": []
+    }
+  }
+}

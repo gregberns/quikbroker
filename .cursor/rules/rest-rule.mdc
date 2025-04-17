@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+The following are rules to 
+
+- All REST endpoints should be built with the [express-zod-api](https://github.com/RobinTail/express-zod-api) framework
+- For consuming the OpenApi spec, use [openapi-zod-client](https://github.com/astahmer/openapi-zod-client/)
+- Once API endpints are generated, a client should be generated to correspond to that spec.
+- All UI code, should consume the REST data through the client

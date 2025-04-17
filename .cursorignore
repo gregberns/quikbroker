@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.yarn/
+
+# Build outputs
+.next/
+dist/
+build/
+coverage/
+
+# Large data files
+db_data/
+*.lock
+*.log
+
+# Environment files (except examples)
+.env
+.env.*
+!.env.example
+
+# Cache files
+.turbo/
+.cache/
+
+# OS specific files
+.DS_Store
+Thumbs.db 

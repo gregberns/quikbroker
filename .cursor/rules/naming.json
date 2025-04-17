@@ -1,0 +1,48 @@
+{
+  "components": {
+    "pattern": "PascalCase",
+    "description": "React components should use PascalCase",
+    "exceptions": []
+  },
+  "hooks": {
+    "pattern": "camelCase",
+    "prefix": "use",
+    "description": "React hooks should use camelCase and start with 'use'",
+    "exceptions": []
+  },
+  "constants": {
+    "pattern": "UPPER_SNAKE_CASE",
+    "description": "Constants should use UPPER_SNAKE_CASE",
+    "exceptions": []
+  },
+  "types": {
+    "pattern": "PascalCase",
+    "description": "TypeScript types and interfaces should use PascalCase",
+    "exceptions": []
+  },
+  "functions": {
+    "pattern": "camelCase",
+    "description": "Functions should use camelCase",
+    "exceptions": []
+  },
+  "files": {
+    "components": {
+      "pattern": "PascalCase",
+      "extension": ".tsx",
+      "description": "Component files should use PascalCase with .tsx extension",
+      "exceptions": []
+    },
+    "api": {
+      "pattern": "kebab-case",
+      "extension": ".ts",
+      "description": "API endpoint files should use kebab-case with .ts extension",
+      "exceptions": []
+    },
+    "utils": {
+      "pattern": "camelCase",
+      "extension": ".ts",
+      "description": "Utility files should use camelCase with .ts extension",
+      "exceptions": []
+    }
+  }
+}

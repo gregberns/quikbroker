@@ -1,0 +1,42 @@
+{
+  "rulesDirectory": "rules",
+  "enabledRules": [
+    "lint",
+    "style",
+    "imports",
+    "naming"
+  ],
+  "filePatterns": {
+    "typescript": [
+      "**/*.ts",
+      "**/*.tsx"
+    ],
+    "javascript": [
+      "**/*.js",
+      "**/*.jsx"
+    ],
+    "json": [
+      "**/*.json"
+    ],
+    "markdown": [
+      "**/*.md"
+    ],
+    "css": [
+      "**/*.css",
+      "**/*.scss"
+    ]
+  },
+  "contextSettings": {
+    "includePatterns": [
+      "packages/app/src/**/*",
+      "packages/schema/migrations/**/*",
+      "packages/tests/**/*.{ts,tsx}"
+    ],
+    "excludePatterns": [
+      "**/*.test.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
+      "**/node_modules/**"
+    ]
+  },
+  "autofixOnSave": true
+}

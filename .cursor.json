@@ -1,0 +1,35 @@
+{
+  "projectName": "QuikBroker",
+  "contextProvider": {
+    "ignorePatterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.next/**",
+      "**/build/**",
+      "**/public/assets/**",
+      "**/db_data/**",
+      "**/coverage/**"
+    ],
+    "alwaysIncludeFiles": [
+      "package.json",
+      "packages/app/package.json",
+      "packages/schema/package.json",
+      "packages/tests/package.json"
+    ],
+    "currentFileContext": 15
+  },
+  "formatOnSave": true,
+  "lintOnSave": true,
+  "editor": {
+    "tabSize": 2,
+    "insertSpaces": true,
+    "wordWrap": "on"
+  },
+  "language": {
+    "typescript": {
+      "compilerOptions": {
+        "strict": true
+      }
+    }
+  }
+}

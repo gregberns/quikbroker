@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "no-console": {
+      "severity": "warning",
+      "description": "Avoid using console.log in production code",
+      "exceptions": [
+        "packages/tests/**"
+      ]
+    },
+    "no-unused-vars": {
+      "severity": "error",
+      "description": "Avoid unused variables",
+      "exceptions": []
+    },
+    "no-any": {
+      "severity": "warning",
+      "description": "Avoid using 'any' type in TypeScript",
+      "exceptions": [
+        "packages/tests/**"
+      ]
+    },
+    "require-await": {
+      "severity": "warning",
+      "description": "Async functions should use await",
+      "exceptions": []
+    }
+  }
+}
