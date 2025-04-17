@@ -118,11 +118,11 @@ jobs:
 
       - name: Run SchemaMigrations
         # uses: superfly/flyctl-actions/setup-flyctl@master
-        with:
-          app: ${{ env.FLY_APP }}
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # with:
+        #   app: ${{ env.FLY_APP }}
+        # env:
+        #   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           flyctl proxy 5432 -a ${{ env.FLY_APP }} > /dev/null 2>&1 &
           sleep 5  # Wait for proxy to initialize
