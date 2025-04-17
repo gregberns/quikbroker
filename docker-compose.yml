@@ -10,6 +10,11 @@ services:
       - "6000:5432"
     volumes:
       - ./db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD', '/usr/bin/pg_isready', '--dbname=db_name', '--username=db_user' ]
+      interval: 5s
+      timeout: 10s
+      retries: 120
 
   app:
     build:
@@ -25,3 +30,25 @@ services:
       # - DATABASE_URL=postgres://db_user:db_password@db:5432/db_name
     depends_on:
       - db
+
+  migrations:
+    build:
+      context: .
+      dockerfile: ./packages/schema/Dockerfile
+    volumes:
+      - type: bind
+        source: ./scripts
+        target: /scripts
+      # - type: bind
+      #   source: ./packages/schema/dumps
+      #   target: /app/dumps
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    entrypoint: [ '' ]
+    # Inspired by: https://docs.docker.com/compose/startup-order/
+    command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'yarn', 'migrate' ]
+    # networks:
+    #   - default

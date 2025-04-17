@@ -12,8 +12,9 @@
     "rollback": "node-pg-migrate down"
   },
   "dependencies": {
+    "node-pg-migrate": "^6.2.0",
     "pg-connection-string": "^2.0.0",
-    "tslib": "^1.10.0",
-    "node-pg-migrate": "^6.2.0"
+    "pg": "^8.14.1",
+    "tslib": "^1.10.0"
   }
 }

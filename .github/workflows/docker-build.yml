@@ -21,13 +21,12 @@ jobs:
 
     strategy:
       matrix:
-        # image: [app, migration]
-        image: [app]
+        image: [app, schema]
         include:
           - image: app
             dockerfile: ./packages/app/Dockerfile
-          # - image: migration
-          #   dockerfile: ./packages/migration/Dockerfile
+          - image: schema
+            dockerfile: ./packages/schema/Dockerfile
 
     steps:
       - name: Checkout repository
@@ -108,6 +107,21 @@ jobs:
           
           echo "Pushing to Fly.io Registry: ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG"
           docker push ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$IMAGE_TAG
+
+      - name: Run SchemaMigrations
+        uses: superfly/flyctl-actions/setup-flyctl@master
+        with:
+          app: ${{ env.FLY_APP }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          flyctl proxy 5432 -a ${{ env.FLY_APP }} > /dev/null 2>&1 &
+          sleep 5  # Wait for proxy to initialize
+          
+          # Run the Schema Migration
+          docker run --rm -it ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/schema:$IMAGE_TAG
+
 
       - name: Deploy to Fly.io
         if: github.ref == 'refs/heads/main'
