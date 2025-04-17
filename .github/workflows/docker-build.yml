@@ -118,19 +118,22 @@ jobs:
       # Run schema migrations
       - name: Run Schema Migrations
         env:
-          flyctl apps list --access-token ***: ${{ secrets.FLY_API_TOKEN }}
+          FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
+
+          export FLY_ACCESS_TOKEN=${{ secrets.FLY_API_TOKEN }}
+          
           flyctl apps list
 
           echo "LIST RETRIEVED"
   
           # The database is most likely not running, so we need to start it
-          # flyctl apps restart ${{ env.FLY_APP_DB }}
+          # flyctl apps restart ${{ env.FLY_APP_DB }} --access-token ${{ secrets.FLY_API_TOKEN }}
           # sleep 20  # Wait for database to start
 
           echo "AFTER SLEEP 1"
 
-          flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} &
+          flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} --access-token ${{ secrets.FLY_API_TOKEN }} &
           
           echo "AFTER PROXY"
           
