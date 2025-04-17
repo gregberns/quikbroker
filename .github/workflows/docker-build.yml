@@ -118,8 +118,8 @@ jobs:
       # Run schema migrations
       - name: Run Schema Migrations
         # uses: superfly/flyctl-actions/setup-flyctl@master
-        with:
-          app: ${{ env.FLY_APP }}
+        # with:
+        #   app: ${{ env.FLY_APP }}
         env:
           FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
