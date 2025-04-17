@@ -117,11 +117,17 @@ jobs:
 
       # Run schema migrations
       - name: Run Schema Migrations
+        uses: superfly/flyctl-actions/setup-flyctl@master
+        with:
+          app: ${{ env.FLY_APP }}
         env:
           FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+        #   FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
 
-          export FLY_ACCESS_TOKEN='${{ secrets.FLY_API_TOKEN }}'
+          # export FLY_ACCESS_TOKEN='${{ secrets.FLY_API_TOKEN }}'
           
           flyctl apps list
 
@@ -133,7 +139,7 @@ jobs:
 
           echo "AFTER SLEEP 1"
 
-          flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} --access-token ${{ secrets.FLY_API_TOKEN }} &
+          flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} &
           
           echo "AFTER PROXY"
           
