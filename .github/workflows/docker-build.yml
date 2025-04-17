@@ -121,7 +121,7 @@ jobs:
           FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
 
-          export FLY_ACCESS_TOKEN=${{ secrets.FLY_API_TOKEN }}
+          export FLY_ACCESS_TOKEN='${{ secrets.FLY_API_TOKEN }}'
           
           flyctl apps list
 
