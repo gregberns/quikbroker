@@ -31,7 +31,7 @@ services:
     depends_on:
       - db
 
-  migrations:
+  migrate:
     build:
       context: .
       dockerfile: ./packages/schema/Dockerfile
@@ -49,6 +49,8 @@ services:
       - .env
     entrypoint: [ '' ]
     # Inspired by: https://docs.docker.com/compose/startup-order/
-    command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'yarn', 'migrate' ]
+    # command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'yarn', 'migrate' ]
+    # command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'docker-entrypoint.sh' ]
+    command: [ 'docker-entrypoint.sh' ]
     # networks:
     #   - default

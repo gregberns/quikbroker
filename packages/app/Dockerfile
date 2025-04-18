@@ -57,4 +57,5 @@ WORKDIR /app/packages/app
 
 # Start the server
 CMD ["node", "./server.js"]
+
 # ENTRYPOINT ["./docker-entrypoint.sh"]
