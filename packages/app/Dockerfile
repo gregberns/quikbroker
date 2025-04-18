@@ -8,7 +8,7 @@ LABEL fly_launch_runtime="NodeJS"
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV YARN_VERSION=4.2.2
-ENV PORT=8080
+# ENV PORT=8080
 
 # Install system dependencies
 RUN apt-get update -qq && \
