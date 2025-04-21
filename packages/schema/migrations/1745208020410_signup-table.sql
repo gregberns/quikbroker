@@ -39,7 +39,7 @@ CREATE TRIGGER signups_updated_at BEFORE INSERT OR UPDATE
   ON app.signups FOR EACH ROW EXECUTE PROCEDURE app.set_updated_at();
 
 -- Add index on email for faster lookups
-DROP INDEX IF EXISTS idx_signups_email ON app.signups
+DROP INDEX IF EXISTS app.idx_signups_email;
 CREATE INDEX idx_signups_email ON app.signups(email);
 
 -- -- Down Migration

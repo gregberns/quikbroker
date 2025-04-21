@@ -17,6 +17,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/pg": "^8.11.12",
     "bcrypt": "^5.1.1",
+    "mui-tel-input": "^9.0.0",
     "next": "15.3.0",
     "pg": "^8.14.1",
     "postcss": "^8.4.38",
