@@ -1,5 +1,8 @@
 'use client';
 
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import type { Route } from 'next';
 import {
   Button,
   Container,
@@ -7,7 +10,9 @@ import {
   Box,
   Paper,
   Card,
-  CardContent
+  CardContent,
+  TextField,
+  CircularProgress
 } from '@mui/material';
 import {
   LocalShipping,
@@ -16,7 +21,62 @@ import {
   Security
 } from '@mui/icons-material';
 
-export default function Home() {
+// Component to handle search params access (needs Suspense boundary)
+function HomePageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams(); // Get search params
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [utmParams, setUtmParams] = useState({});
+
+  // Extract UTM params on component mount
+  useEffect(() => {
+    const params: { [key: string]: string } = {};
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+    utmKeys.forEach(key => {
+      const value = searchParams.get(key);
+      if (value) {
+        params[key] = value;
+      }
+    });
+    setUtmParams(params);
+  }, [searchParams]);
+
+  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!email) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/signups', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, ...utmParams }), // Include UTM params
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to submit email.');
+      }
+
+      // Redirect on success, keep existing UTM params if present
+      const currentParams = new URLSearchParams(searchParams.toString());
+      currentParams.set('email', email);
+      router.push(`/signup?${currentParams.toString()}` as Route);
+
+    } catch (err: any) {
+      console.error("Signup submission error:", err);
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Box className="min-h-screen bg-gradient-to-b from-blue-50 to-white text-gray-800">
       {/* Hero Section */}
@@ -33,7 +93,7 @@ export default function Home() {
               variant="contained"
               size="large"
               className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg"
-              href="/login"
+              href="#signup-form"
             >
               Get Started
             </Button>
@@ -124,26 +184,48 @@ export default function Home() {
         </Container>
       </Box>
 
-      {/* Call to Action */}
-      <Box className="py-16 bg-blue-50">
-        <Container maxWidth="md">
+      {/* Signup Form Section */}
+      <Box id="signup-form" className="py-16 bg-blue-50">
+        <Container maxWidth="sm">
           <Paper className="p-8 shadow-lg bg-white rounded-lg">
             <Typography variant="h4" className="text-center font-semibold mb-4 text-blue-800">
-              Ready to Transform Your Logistics?
+              Get Started with QuikBroker
             </Typography>
             <Typography className="text-center text-gray-600 mb-6">
-              Join thousands of brokers and carriers who have streamlined their operations with QuikBroker.
+              Enter your email to begin the signup process.
             </Typography>
-            <Box className="flex justify-center">
-              <Button
-                variant="contained"
-                size="large"
-                className="bg-blue-600 hover:bg-blue-700 px-8 py-3 text-lg"
-                href="/signup"
-              >
-                Sign Up Now
-              </Button>
-            </Box>
+            <form onSubmit={handleEmailSubmit}>
+              <Box className="flex flex-col sm:flex-row gap-4 justify-center items-start">
+                <TextField
+                  label="Email Address"
+                  variant="outlined"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  fullWidth
+                  disabled={isLoading}
+                  error={!!error}
+                  helperText={error}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '0.375rem',
+                    },
+                    backgroundColor: 'white'
+                  }}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={isLoading}
+                  className="bg-blue-600 hover:bg-blue-700 py-3 text-lg sm:py-0 sm:px-8 w-full sm:w-auto"
+                  sx={{ height: '56px' }}
+                >
+                  {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
+                </Button>
+              </Box>
+            </form>
           </Paper>
         </Container>
       </Box>
@@ -192,5 +274,14 @@ export default function Home() {
         </Container>
       </Box>
     </Box>
+  );
+}
+
+// Wrap the main export in Suspense because useSearchParams needs it
+export default function Home() {
+  return (
+    <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><CircularProgress /></Box>}>
+      <HomePageContent />
+    </Suspense>
   );
 }

@@ -10,9 +10,13 @@ Add all needed environmental variables to an `.env` file.
 
 ## Migrations
 
-[Graphile Migrate](https://github.com/graphile/migrate) should be used to migrate the database forward.
+Migration scripts need to be written so they can be run multiple times.
 
-IMPORTANT: Read the [Configuration Section](https://github.com/graphile/migrate?tab=readme-ov-file#configuration) to understand how to configure the `.gmrc` file.
+So `CREATE TABLE` needs to be `CREATE TABLE IF NOT EXISTS`.
+
+Triggers need to be created with a `DROP TRIGGER IF EXISTS` before the create statement.
+
+Indexes need to be dropped with `DROP INDEX IF EXISTS ` before they're created.
 
 ## Database Name
 
@@ -20,8 +24,8 @@ The database should be called `quikbroker`
 
 ## Schema
 
-All tables, functions, views, and application resources must be created in an `app_public` schema.
-There should also be two more schemas added: `app_private` and `app_hidden`.
+All tables, functions, views, and application resources must be created in an `app` schema.
+There should also be two more schemas added: `app_private` and `app_hidden`, for data used in backend processes only.
 
 ## Required Columns
 

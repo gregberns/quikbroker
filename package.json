@@ -17,8 +17,8 @@
     "app:start": "dotenv -f .env yarn workspace @quikbroker/app start",
     "app:lint": "dotenv -f .env yarn workspace @quikbroker/app lint",
     "app:format": "dotenv -f .env yarn workspace @quikbroker/app format",
-    "schema:new": "dotenv -f .env yarn workspace @quikbroker/schema create",
-    "schema:migrate": "yarn workspace @quikbroker/schema migrate",
+    "schema:new": "dotenv -f .env yarn workspace @quikbroker/schema create-migration",
+    "schema:migrate": "dotenv -f .env yarn workspace @quikbroker/schema migrate",
     "schema:rollback": "dotenv -f .env yarn workspace @quikbroker/schema rollback"
   },
   "dependencies": {
