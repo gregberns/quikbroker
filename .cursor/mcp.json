@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "cursor-rules-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "cursor-rules-mcp"
+      ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": ".ai-data/memory.json"
+      }
+    }
+  }
+}
