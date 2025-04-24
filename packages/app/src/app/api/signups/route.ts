@@ -7,7 +7,7 @@ const phonePattern = /^[+]?[-\d()\s]{7,20}$/;
 
 // Database connection pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.POSTGRES_CONNECTION,
 });
 
 // Input validation schema - include optional contact and UTM params

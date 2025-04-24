@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "node server.js",
-    "lint": "next lint && npx tsc --noEmit"
+    "lint": "next lint && npx tsc --noEmit",
+    "generate-db-types": "dotenv -f ../../.env -- npx zapatos"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,7 +16,6 @@
     "@mui/material": "^7.0.2",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/bcrypt": "^5.0.2",
-    "@types/pg": "^8.11.12",
     "bcrypt": "^5.1.1",
     "mui-tel-input": "^9.0.0",
     "next": "15.3.0",
@@ -29,10 +29,13 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
+    "@types/pg": "^8.11.13",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.24.0",
     "eslint-config-next": "15.3.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "zapatos": "^6.5.0"
   }
 }

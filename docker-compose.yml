@@ -2,16 +2,21 @@ services:
   db:
     image: postgres:16
     restart: always
-    environment:
-      POSTGRES_USER: db_user
-      POSTGRES_PASSWORD: db_password
-      POSTGRES_DB: db_name
+    # environment:
+    #   - DATABASE_USERNAME=quikbroker_owner
+    #   - DATABASE_PASSWORD=1234
+    #   - DATABASE_HOST=localhost
+    #   - DATABASE_NAME=quikbroker
+    #   - DATABASE_PORT=6000
+    env_file:
+      - .env
     ports:
       - "6000:5432"
     volumes:
+      - ./scripts/new-db:/docker-entrypoint-initdb.d/
       - ./db_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ 'CMD', '/usr/bin/pg_isready', '--dbname=db_name', '--username=db_user' ]
+      test: [ 'CMD', '/usr/bin/pg_isready', '--dbname=quikbroker', '--username=quikbroker_owner' ]
       interval: 5s
       timeout: 10s
       retries: 120
@@ -24,10 +29,12 @@ services:
     ports:
       # - "3003:3000"
       - "3003:8080"
-    environment:
-      - NODE_ENV=development
-      - PORT=8080
-      # - DATABASE_URL=postgres://db_user:db_password@db:5432/db_name
+    # environment:
+    #   - NODE_ENV=development
+    #   - PORT=8080
+    #   - POSTGRES_CONNECTION=postgres://quikbroker_owner:1234@localhost:6000/quikbroker
+    env_file:
+      - .env
     depends_on:
       - db
 

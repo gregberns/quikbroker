@@ -5,7 +5,7 @@ import { logErrorToServer } from "../../../lib/errorHandling";
 
 // Create a connection pool to the database
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.POSTGRES_CONNECTION,
 });
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

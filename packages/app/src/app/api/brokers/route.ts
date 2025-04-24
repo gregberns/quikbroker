@@ -5,7 +5,7 @@ import crypto from "crypto";
 
 // Create a connection pool to the database
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.POSTGRES_CONNECTION,
 });
 
 // Helper function to generate a secure random token

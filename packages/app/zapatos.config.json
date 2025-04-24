@@ -1,0 +1,10 @@
+{
+  "db": {
+    "connectionString": "env:POSTGRES_CONNECTION"
+  },
+  "outDir": "./src/db/generated",
+  "schemas": [
+    "app"
+  ],
+  "isolationLevel": "READ COMMITTED"
+}
