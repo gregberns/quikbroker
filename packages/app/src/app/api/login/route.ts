@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
 import { cookies } from "next/headers";
 import { verifyPassword } from "../../lib/auth";
-
-// Create a connection pool to the database
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_CONNECTION,
-});
+import { getUserByEmail } from "@/db/queries/users";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,67 +16,56 @@ export async function POST(req: NextRequest) {
     }
 
     // Query the database for the user
-    const client = await pool.connect();
-    try {
-      const result = await client.query(
-        "SELECT id, email, password_hash, role FROM app.users WHERE email = $1",
-        [email]
+    const user = await getUserByEmail(email);
+    // User not found
+    if (!user) {
+      return NextResponse.json(
+        { message: "Invalid email or password" },
+        { status: 401 }
       );
+    }
 
-      // User not found
-      if (result.rows.length === 0) {
-        return NextResponse.json(
-          { message: "Invalid email or password" },
-          { status: 401 }
-        );
-      }
+    // Use the centralized password verification function
+    const passwordMatch = await verifyPassword(password, user.password_hash);
 
-      const user = result.rows[0];
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { message: "Invalid email or password" },
+        { status: 401 }
+      );
+    }
 
-      // Use the centralized password verification function
-      const passwordMatch = await verifyPassword(password, user.password_hash);
+    // Authentication successful - create session cookie
+    // In a real application, you would use a proper session/JWT implementation
+    // For simplicity, we'll just create a basic session cookie
+    const sessionValue = JSON.stringify({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      // In a real app, add token expiry and signature
+    });
 
-      if (!passwordMatch) {
-        return NextResponse.json(
-          { message: "Invalid email or password" },
-          { status: 401 }
-        );
-      }
+    // Set the session cookie - await cookies() to fix the error
+    const cookieStore = await cookies();
+    cookieStore.set({
+      name: "session",
+      value: sessionValue,
+      httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      // In a real app, set proper expiry time
+      maxAge: 60 * 60 * 24, // 1 day
+    });
 
-      // Authentication successful - create session cookie
-      // In a real application, you would use a proper session/JWT implementation
-      // For simplicity, we'll just create a basic session cookie
-      const sessionValue = JSON.stringify({
+    return NextResponse.json({
+      message: "Login successful",
+      user: {
         id: user.id,
         email: user.email,
         role: user.role,
-        // In a real app, add token expiry and signature
-      });
-
-      // Set the session cookie - await cookies() to fix the error
-      const cookieStore = await cookies();
-      cookieStore.set({
-        name: 'session',
-        value: sessionValue,
-        httpOnly: true,
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        // In a real app, set proper expiry time
-        maxAge: 60 * 60 * 24 // 1 day
-      });
-
-      return NextResponse.json({
-        message: "Login successful",
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        },
-      });
-    } finally {
-      client.release();
-    }
+      },
+    });
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
+import { getClient } from "@/db/client";
 import { hashPassword } from "../../../lib/auth";
-
-// Create a connection pool to the database
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_CONNECTION,
-});
+import {
+  getUserInviteWithUserByToken,
+  markUserInviteAsUsed,
+} from "@/db/queries/userInvites";
+import { updateUserPassword } from "@/db/queries/users";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,35 +26,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const client = await pool.connect();
-
+    const sql = getClient();
     try {
       // Start a transaction
-      await client.query('BEGIN');
+      await sql.query("BEGIN");
 
-      // Find the invitation by token
-      const inviteResult = await client.query(
-        `SELECT i.*, u.id as user_id, u.email 
-         FROM app.user_invites i
-         JOIN app.users u ON i.user_id = u.id
-         WHERE i.token = $1 AND i.expires_at > NOW()`,
-        [token]
-      );
+      // Find the invitation by token with user information
+      const invite = await getUserInviteWithUserByToken(token);
 
       // Check if invitation exists and is valid
-      if (inviteResult.rows.length === 0) {
+      if (!invite) {
         return NextResponse.json(
           { message: "Invalid or expired verification token" },
           { status: 400 }
         );
       }
 
-      const invite = inviteResult.rows[0];
-
       // Check if the token has already been used
       if (invite.used_at) {
         return NextResponse.json(
-          { message: "This verification link has already been used. Please request a new one." },
+          {
+            message:
+              "This verification link has already been used. Please request a new one.",
+          },
           { status: 400 }
         );
       }
@@ -63,31 +57,23 @@ export async function POST(req: NextRequest) {
       const passwordHash = await hashPassword(password);
 
       // Update the user's password
-      await client.query(
-        "UPDATE app.users SET password_hash = $1 WHERE id = $2",
-        [passwordHash, invite.user_id]
-      );
+      await updateUserPassword(invite.user_id, passwordHash);
 
       // Mark the invitation as used
-      await client.query(
-        "UPDATE app.user_invites SET used_at = NOW() WHERE id = $1",
-        [invite.id]
-      );
+      await markUserInviteAsUsed(invite.id);
 
       // Commit the transaction
-      await client.query('COMMIT');
+      await sql.query("COMMIT");
 
       // Return success
       return NextResponse.json({
         message: "Password set successfully",
-        email: invite.email
+        email: invite.email,
       });
     } catch (error) {
       // Rollback the transaction on error
-      await client.query('ROLLBACK');
+      await sql.query("ROLLBACK");
       throw error;
-    } finally {
-      client.release();
     }
   } catch (error) {
     console.error("Error setting password:", error);
