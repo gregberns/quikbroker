@@ -20,7 +20,7 @@ export type UserWithBrokerName = s.users.Selectable & {
 export async function getUserByEmail(
   email: string
 ): Promise<s.users.Selectable | null> {
-  const user = await db.selectOne("users", { email }).run(sql);
+  const user = await db.selectOne("app.users", { email }).run(sql);
 
   return user || null;
 }
@@ -28,7 +28,7 @@ export async function getUserByEmail(
 export async function getUserById(
   id: number
 ): Promise<s.users.Selectable | null> {
-  const user = await db.selectOne("users", { id }).run(sql);
+  const user = await db.selectOne("app.users", { id }).run(sql);
 
   return user || null;
 }
@@ -37,7 +37,7 @@ export async function createUser(
   input: CreateUserInput
 ): Promise<s.users.Selectable> {
   return await db
-    .insert("users", {
+    .insert("app.users", {
       email: input.email,
       password_hash: input.password_hash,
       role: input.role,
@@ -49,7 +49,7 @@ export async function updateUserEmail(
   userId: number,
   email: string
 ): Promise<s.users.Selectable | null> {
-  return await db.update("users", { email }, { id: userId }).run(sql);
+  return await db.update("app.users", { email }, { id: userId }).run(sql);
 }
 
 export async function updateUserPassword(
@@ -57,7 +57,7 @@ export async function updateUserPassword(
   passwordHash: string
 ): Promise<s.users.Selectable | null> {
   return await db
-    .update("users", { password_hash: passwordHash }, { id: userId })
+    .update("app.users", { password_hash: passwordHash }, { id: userId })
     .run(sql);
 }
 

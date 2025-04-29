@@ -22,7 +22,7 @@ export async function createUserInvite(
   input: CreateUserInviteInput
 ): Promise<s.user_invites.Selectable> {
   return await db
-    .insert("user_invites", {
+    .insert("app.user_invites", {
       user_id: input.user_id,
       token: input.token,
       expires_at: input.expires_at,
@@ -35,7 +35,7 @@ export async function getUserInviteByToken(
 ): Promise<s.user_invites.Selectable | null> {
   const invite = await db
     .selectOne(
-      "user_invites",
+      "app.user_invites",
       { token, expires_at: db.conditions.gt(new Date()) },
       {
         order: [{ by: "created_at", direction: "DESC" }],
@@ -71,7 +71,7 @@ export async function getActiveInviteForUser(
 ): Promise<s.user_invites.Selectable | null> {
   const invite = await db
     .selectOne(
-      "user_invites",
+      "app.user_invites",
       { user_id: userId, expires_at: db.conditions.gt(new Date()) },
       {
         order: [{ by: "created_at", direction: "DESC" }],
@@ -86,7 +86,7 @@ export async function markUserInviteAsUsed(
   id: number
 ): Promise<s.user_invites.Selectable | null> {
   return await db
-    .update("user_invites", { used_at: new Date() }, { id })
+    .update("app.user_invites", { used_at: new Date() }, { id })
     .run(sql);
 }
 

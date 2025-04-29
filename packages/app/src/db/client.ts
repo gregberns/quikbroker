@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import * as db from 'zapatos/db';
+import { Pool } from "pg";
+import * as db from "zapatos/db";
 
 const pool = new Pool({
   connectionString: process.env.POSTGRES_CONNECTION,
@@ -11,4 +11,4 @@ export const getClient = () => pool;
 export const sql = pool;
 
 // Re-export commonly used Zapatos functions
-export { conditions, select, insert, update, deletes } from 'zapatos/db';
+export { conditions, select, insert, update, deletes } from "zapatos/db";

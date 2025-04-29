@@ -1,0 +1,15 @@
+{
+  "db": {
+    "connectionString": "{{POSTGRES_CONNECTION}}"
+  },
+  "outDir": "./src/db/generated",
+  "schemas": ["app"],
+  "columnOptions": {
+    "*": {
+      "updated_at": {
+        "insert": "excluded",
+        "update": "excluded"
+      }
+    }
+  }
+}
