@@ -3,3 +3,5 @@ node_modules/
 db_data/
 db_data_shadow/
 .env
+
+**/.claude/settings.local.json

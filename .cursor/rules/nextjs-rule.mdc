@@ -70,7 +70,6 @@ State Management
 - Use context for intermediate state sharing when prop drilling becomes cumbersome.
 
 UI and Styling
-- Use Mui UI for component foundations.
 - Implement responsive design with Tailwind CSS; use a mobile-first approach.
 - Use Stylus as CSS Modules for component-specific styles:
 - Use Tailwind for utility classes and rapid prototyping.

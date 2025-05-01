@@ -2,19 +2,20 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import {
-  Container,
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Paper,
-  CircularProgress
-} from '@mui/material';
-import { MuiTelInput, matchIsValidTel } from 'mui-tel-input';
+import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/ui/phone-input';
+import { FormField } from '@/components/ui/form-field';
+import { Container } from '@/components/ui/container';
 
-// Phone number regex for client-side validation
-const phonePattern = /^[+]?[-\d()\s]{7,20}$/;
+// Simple phone validation function
+const isValidPhone = (phone: string): boolean => {
+  // Remove all non-digits
+  const digits = phone.replace(/\D/g, '');
+  // Check for reasonable length
+  return digits.length >= 7 && digits.length <= 15;
+};
 
 function SignupForm() {
   const searchParams = useSearchParams();
@@ -26,6 +27,7 @@ function SignupForm() {
   const [utmParams, setUtmParams] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Sync email when URL changes
@@ -44,23 +46,24 @@ function SignupForm() {
   }, [searchParams]);
 
   // Handler for phone number changes
-  const handlePhoneChange = (value: string) => {
-    setPhoneNumber(value);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(e.target.value);
     // Clear error when user starts typing again
-    if (error && error.includes('phone')) {
-      setError(null);
+    if (phoneError) {
+      setPhoneError(null);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setPhoneError(null);
     setSuccessMessage(null);
     setIsLoading(true);
 
-    // Validate phone using the matchIsValidTel function from mui-tel-input
-    if (phoneNumber && !matchIsValidTel(phoneNumber)) {
-      setError('Please enter a valid phone number');
+    // Validate phone
+    if (phoneNumber && !isValidPhone(phoneNumber)) {
+      setPhoneError('Please enter a valid phone number');
       setIsLoading(false);
       return;
     }
@@ -91,74 +94,104 @@ function SignupForm() {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Paper sx={{ mt: 8, p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h4" sx={{ mb: 2, textAlign: 'center' }}>
-          Request More Information
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 3, textAlign: 'center', color: 'text.secondary' }}>
-          Thanks for your interest! If you'd like us to contact you directly with more details about QuikBroker, please provide your information below. Otherwise, feel free to explore the site.
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Email Address"
-            variant="outlined"
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            fullWidth
-            InputProps={{ readOnly: !!initialEmail }}
-            sx={{ backgroundColor: 'white' }}
-          />
-          <TextField
-            label="Full Name (Optional)"
-            variant="outlined"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            fullWidth
-            sx={{ backgroundColor: 'white' }}
-          />
-          <TextField
-            label="Brokerage Name (Optional)"
-            variant="outlined"
-            value={brokerage}
-            onChange={e => setBrokerage(e.target.value)}
-            fullWidth
-            sx={{ backgroundColor: 'white' }}
-          />
-          <MuiTelInput
-            label="Phone Number (Optional)"
-            value={phoneNumber}
-            onChange={handlePhoneChange}
-            defaultCountry="US"
-            preferredCountries={['US', 'CA']}
-            fullWidth
-            error={!!error && error.includes('phone')}
-            helperText={error && error.includes('phone') ? error : ''}
-            sx={{ backgroundColor: 'white' }}
-          />
-          {error && !error.includes('phone') && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
-          {successMessage && (
-            <Typography color="success.main" variant="body2" sx={{ mt: 1, textAlign: 'center' }}>
-              {successMessage}
-            </Typography>
-          )}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            disabled={isLoading || !!successMessage}
-            sx={{ mt: 2, py: 1.5, fontSize: '1rem' }}
-          >
-            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Request Contact'}
-          </Button>
-        </Box>
-      </Paper>
+    <Container size="small" className="py-8">
+      <Card className="shadow-md">
+        <CardHeader className="text-center space-y-2">
+          <CardTitle className="text-2xl font-semibold">
+            Request More Information
+          </CardTitle>
+          <CardDescription className="text-base">
+            Thanks for your interest! If you'd like us to contact you directly with more details about QuikBroker, 
+            please provide your information below. Otherwise, feel free to explore the site.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <FormField 
+              id="email" 
+              label="Email Address"
+            >
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                readOnly={!!initialEmail}
+                className="w-full"
+              />
+            </FormField>
+            
+            <FormField 
+              id="name" 
+              label="Full Name (Optional)"
+            >
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className="w-full"
+              />
+            </FormField>
+            
+            <FormField 
+              id="brokerage" 
+              label="Brokerage Name (Optional)"
+            >
+              <Input
+                id="brokerage"
+                type="text"
+                value={brokerage}
+                onChange={e => setBrokerage(e.target.value)}
+                className="w-full"
+              />
+            </FormField>
+            
+            <FormField 
+              id="phone" 
+              label="Phone Number (Optional)"
+              error={phoneError || undefined}
+            >
+              <PhoneInput
+                id="phone"
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                error={!!phoneError}
+                className="w-full"
+              />
+            </FormField>
+            
+            {error && (
+              <div className="text-sm text-destructive pt-2">
+                {error}
+              </div>
+            )}
+            
+            {successMessage && (
+              <div className="text-sm text-green-600 font-medium text-center pt-2">
+                {successMessage}
+              </div>
+            )}
+            
+            <Button
+              type="submit"
+              className="w-full mt-4"
+              disabled={isLoading || !!successMessage}
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading
+                </span>
+              ) : 'Request Contact'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </Container>
   );
 }
@@ -166,9 +199,9 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <Suspense fallback={
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
     }>
       <SignupForm />
     </Suspense>
