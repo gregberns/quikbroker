@@ -1,8 +1,9 @@
-'use client'; // Mark as a Client Component
+'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -42,5 +43,12 @@ export default function DashboardPage() {
     fetchUserData();
   }, [router]);
 
-  return <div className="flex justify-center items-center min-h-screen">Redirecting...</div>;
+  return (
+    <div className="flex justify-center items-center h-full">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Redirecting to your dashboard...</p>
+      </div>
+    </div>
+  );
 }

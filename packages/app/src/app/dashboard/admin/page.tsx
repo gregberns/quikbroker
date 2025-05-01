@@ -3,9 +3,14 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Users, Building2, Truck, AlertCircle, Loader2, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { StatsCard } from '@/components/ui/dashboard/stats-card';
 
 export default function AdminHome() {
-  // Add state for user data
   const [user, setUser] = useState<{ id: number; email: string; role: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [companyName, setCompanyName] = useState('');
@@ -13,6 +18,11 @@ export default function AdminHome() {
   const [contactName, setContactName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    totalBrokers: 0,
+    totalCarriers: 0,
+    totalUsers: 0
+  });
   const router = useRouter();
 
   // Fetch user data on component mount
@@ -27,6 +37,13 @@ export default function AdminHome() {
 
         const data = await response.json();
         setUser(data.user);
+        
+        // In a real app, you'd fetch these stats from an API
+        setStats({
+          totalBrokers: 12,
+          totalCarriers: 87,
+          totalUsers: 25
+        });
       } catch {
         setError('Failed to fetch admin data');
       } finally {
@@ -36,30 +53,6 @@ export default function AdminHome() {
 
     fetchUserData();
   }, [router]);
-
-  // Handle logout
-  const handleLogout = async () => {
-    try {
-      // Call server-side logout endpoint to invalidate the session
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        console.error('Logout failed on server');
-      }
-    } catch (error) {
-      console.error('Error during logout:', error);
-    } finally {
-      // Clear the session cookie on the client side
-      document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      // Redirect to login
-      router.push('/login');
-    }
-  };
 
   // Handle form submission
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -97,126 +90,156 @@ export default function AdminHome() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
-      {/* New header bar */}
-      <header className="bg-white shadow mb-6">
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Admin Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-600">{user?.email}</span>
-            <button
-              onClick={handleLogout}
-              className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-3xl font-bold mb-4">Admin Dashboard</h2>
+        <p className="text-muted-foreground">
+          Welcome to the administrative dashboard. From here you can manage brokers, carriers, and users.
+        </p>
+      </div>
 
-      <div className="flex flex-col items-center justify-center px-4">
-        <div className="text-center max-w-3xl mb-8">
-          <p className="text-lg font-medium text-gray-900">Welcome to the administrative dashboard. From here you can manage brokers, carriers, and users.</p>
-        </div>
+      {/* Stats cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatsCard 
+          title="Total Brokers" 
+          value={stats.totalBrokers} 
+          icon={<Building2 className="h-5 w-5" />} 
+          trend="up" 
+          trendValue="2 new this month"
+        />
+        <StatsCard 
+          title="Total Carriers" 
+          value={stats.totalCarriers}
+          icon={<Truck className="h-5 w-5" />} 
+          trend="up" 
+          trendValue="14 new this month"
+        />
+        <StatsCard 
+          title="Total Users" 
+          value={stats.totalUsers}
+          icon={<Users className="h-5 w-5" />} 
+          trend="up" 
+          trendValue="3 new this month"
+        />
+      </div>
 
-        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* User Management Section */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">User Management</h2>
-            <p className="mb-6 text-gray-800">Manage system users, reset passwords, and control access permissions.</p>
-            <div className="flex flex-col space-y-3">
-              <Link href="/dashboard/admin/users" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center">
-                View All Users
-              </Link>
-            </div>
-          </div>
+      {/* Quick access cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* User Management Card */}
+        <Card className="p-6">
+          <h3 className="text-xl font-bold mb-2">User Management</h3>
+          <p className="text-muted-foreground mb-6">
+            Manage system users, reset passwords, and control access permissions.
+          </p>
+          <Button asChild className="w-full">
+            <Link href="/dashboard/admin/users">
+              <Users className="mr-2 h-4 w-4" />
+              View All Users
+            </Link>
+          </Button>
+        </Card>
 
-          {/* Broker Management Section */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Broker Management</h2>
-            <p className="mb-6 text-gray-800">Add new brokers to the system and manage existing broker relationships.</p>
-            <div className="flex flex-col space-y-3">
-              <Link href="/dashboard/admin/brokers" className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center">
-                View All Brokers
-              </Link>
-            </div>
-          </div>
+        {/* Broker Management Card */}
+        <Card className="p-6">
+          <h3 className="text-xl font-bold mb-2">Broker Management</h3>
+          <p className="text-muted-foreground mb-6">
+            Add new brokers to the system and manage existing broker relationships.
+          </p>
+          <Button asChild variant="secondary" className="w-full">
+            <Link href="/dashboard/admin/brokers">
+              <Building2 className="mr-2 h-4 w-4" />
+              View All Brokers
+            </Link>
+          </Button>
+        </Card>
 
-          {/* Carrier Management Section */}
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Carrier Management</h2>
-            <p className="mb-6 text-gray-800">Add new carriers to the system and manage existing transportation providers.</p>
-            <div className="flex flex-col space-y-3">
-              <Link href="/dashboard/admin/carriers" className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-center">
-                View All Carriers
-              </Link>
-            </div>
-          </div>
-        </div>
+        {/* Carrier Management Card */}
+        <Card className="p-6">
+          <h3 className="text-xl font-bold mb-2">Carrier Management</h3>
+          <p className="text-muted-foreground mb-6">
+            Add new carriers to the system and manage existing transportation providers.
+          </p>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/dashboard/admin/carriers">
+              <Truck className="mr-2 h-4 w-4" />
+              View All Carriers
+            </Link>
+          </Button>
+        </Card>
+      </div>
 
-        <div className="w-full max-w-6xl mb-8 flex justify-center">
-          <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">Add a New Broker</h2>
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-gray-800 mb-1">
-                  Company Name
-                </label>
-                <input
-                  type="text"
-                  id="companyName"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                  disabled={isLoading}
-                />
+      {/* Add New Broker Form */}
+      <div className="flex justify-center">
+        <Card className="p-6 max-w-md w-full">
+          <h3 className="text-xl font-bold mb-6 flex items-center">
+            <Plus className="mr-2 h-5 w-5" />
+            Add a New Broker
+          </h3>
+          
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded flex items-start" role="alert">
+                <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-800 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              <div>
-                <label htmlFor="contactName" className="block text-sm font-medium text-gray-800 mb-1">
-                  Contact&apos;s Name
-                </label>
-                <input
-                  type="text"
-                  id="contactName"
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              {error && (
-                <div className="text-red-600 text-sm">{error}</div>
-              )}
-              <button
-                type="submit"
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="companyName">Company Name</Label>
+              <Input
+                id="companyName"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                required
                 disabled={isLoading}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Adding...' : 'Add Broker'}
-              </button>
-            </form>
-          </div>
-        </div>
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="contactName">Contact's Name</Label>
+              <Input
+                id="contactName"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : 'Add Broker'}
+            </Button>
+          </form>
+        </Card>
       </div>
     </div>
   );
