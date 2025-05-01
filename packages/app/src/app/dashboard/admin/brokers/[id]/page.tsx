@@ -63,6 +63,7 @@ interface Broker {
   name: string;
   primary_email: string;
   owner_user_id: number;
+  brokerage_name?: string;
   created_at?: string;
   updated_at?: string;
   invitation_sent_at?: string;
@@ -87,7 +88,7 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
   const [copied, setCopied] = useState(false);
   const [showNoInviteWarning, setShowNoInviteWarning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<{ name: string; primary_email: string }>({ name: '', primary_email: '' });
+  const [editForm, setEditForm] = useState<{ name: string; primary_email: string; brokerage_name?: string }>({ name: '', primary_email: '', brokerage_name: '' });
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -156,7 +157,8 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
         setBroker(foundBroker);
         setEditForm({
           name: foundBroker.name,
-          primary_email: foundBroker.primary_email
+          primary_email: foundBroker.primary_email,
+          brokerage_name: foundBroker.brokerage_name || ''
         });
 
         // If the broker has an invitation sent, try to fetch the active invite link
@@ -236,7 +238,8 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
     setIsEditing(true);
     setEditForm({
       name: broker.name,
-      primary_email: broker.primary_email
+      primary_email: broker.primary_email,
+      brokerage_name: broker.brokerage_name || ''
     });
     setUpdateError(null);
   };
@@ -397,6 +400,20 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
                 <form onSubmit={handleUpdateBroker}>
                   <div className="space-y-4">
                     <div>
+                      <label htmlFor="brokerage_name" className="block text-sm font-medium text-gray-700">
+                        Brokerage Name
+                      </label>
+                      <input
+                        type="text"
+                        id="brokerage_name"
+                        name="brokerage_name"
+                        value={editForm.brokerage_name}
+                        onChange={handleInputChange}
+                        required
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                         Company Name
                       </label>
@@ -447,10 +464,14 @@ export default function BrokerDetailsPage({ params }: { params: Promise<{ id: st
               <div className="border-t border-gray-200">
                 <dl>
                   <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt className="text-sm font-medium text-gray-500">Brokerage Name</dt>
+                    <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{broker.brokerage_name || 'Not set'}</dd>
+                  </div>
+                  <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">Company Name</dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{broker.name}</dd>
                   </div>
-                  <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt className="text-sm font-medium text-gray-500">Email</dt>
                     <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{broker.primary_email}</dd>
                   </div>

@@ -82,7 +82,7 @@ export async function PUT(
         }
 
         // Parse the request body
-        const { name, primary_email } = await req.json();
+        const { name, primary_email, brokerage_name } = await req.json();
 
         // Validate input
         if (!name || !primary_email) {
@@ -114,7 +114,7 @@ export async function PUT(
             );
           }
 
-          const updateData = { name, primary_email };
+          const updateData = { name, primary_email, brokerage_name };
           await updateBroker(brokerId, updateData);
 
           // Update the user email if there's an associated user

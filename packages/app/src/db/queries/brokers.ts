@@ -8,6 +8,7 @@ export const createBrokerSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   contactName: z.string().min(1),
+  brokerage_name: z.string().optional(),
 });
 
 export type CreateBrokerInput = z.infer<typeof createBrokerSchema>;
@@ -30,6 +31,7 @@ export async function createBroker(
       name: input.name,
       primary_email: input.email,
       owner_user_id: ownerUserId,
+      brokerage_name: input.brokerage_name,
     })
     .run(sql);
 }

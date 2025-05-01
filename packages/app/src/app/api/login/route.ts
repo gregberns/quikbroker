@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyPassword } from "../../lib/auth";
+import { verifyPassword, createSession } from "../../lib/auth";
 import { getUserByEmail } from "@/db/queries/users";
+import { logErrorToServer } from "../../lib/errorHandling";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +18,8 @@ export async function POST(req: NextRequest) {
 
     // Query the database for the user
     const user = await getUserByEmail(email);
-    // User not found
+    
+    // User not found - return the same error message to prevent user enumeration
     if (!user) {
       return NextResponse.json(
         { message: "Invalid email or password" },
@@ -29,35 +31,32 @@ export async function POST(req: NextRequest) {
     const passwordMatch = await verifyPassword(password, user.password_hash);
 
     if (!passwordMatch) {
+      // Log failed login attempts (for security monitoring)
+      logErrorToServer({
+        type: "security-warning",
+        message: "Failed login attempt",
+        email: email,
+        timestamp: new Date().toISOString(),
+      });
+      
       return NextResponse.json(
         { message: "Invalid email or password" },
         { status: 401 }
       );
     }
 
-    // Authentication successful - create session cookie
-    // In a real application, you would use a proper session/JWT implementation
-    // For simplicity, we'll just create a basic session cookie
-    const sessionValue = JSON.stringify({
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      // In a real app, add token expiry and signature
-    });
-
-    // Set the session cookie - await cookies() to fix the error
+    // Authentication successful - create JWT session
     const cookieStore = await cookies();
-    cookieStore.set({
-      name: "session",
-      value: sessionValue,
-      httpOnly: true,
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      // In a real app, set proper expiry time
-      maxAge: 60 * 60 * 24, // 1 day
-    });
+    await createSession(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      cookieStore
+    );
 
+    // Return success response with user info
     return NextResponse.json({
       message: "Login successful",
       user: {
@@ -68,6 +67,16 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Login error:", error);
+    
+    // Log error
+    logErrorToServer({
+      type: "api-error",
+      message: error instanceof Error ? error.message : "Unknown login error",
+      stack: error instanceof Error ? error.stack : undefined,
+      url: req.url,
+      timestamp: new Date().toISOString(),
+    });
+    
     return NextResponse.json(
       { message: "An error occurred during login" },
       { status: 500 }

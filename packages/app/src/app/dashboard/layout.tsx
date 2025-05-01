@@ -95,6 +95,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         setUser(data.user);
       } catch (error) {
         console.error('Error fetching user data:', error);
+        // Redirect to login page when not authenticated
+        window.location.href = '/login';
       } finally {
         setLoading(false);
       }

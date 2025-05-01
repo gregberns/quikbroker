@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
       try {
         // Parse the request body
-        const { name, email, contactName } =
+        const { name, email, contactName, brokerage_name } =
           (await req.json()) as CreateBrokerInput;
 
         // Validate input
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
           // 3. Create the broker record and link it to the user
           const ownerUserId = newUser.id;
           const broker = await createBroker(
-            { name, email, contactName },
+            { name, email, contactName, brokerage_name },
             ownerUserId
           );
 
@@ -108,10 +108,17 @@ export async function POST(req: NextRequest) {
           });
 
           // 6. Create a job to send the broker invitation email
-          await createJob({
+          const job = await createJob({
             task_identifier: "broker_email_invite",
             payload: { user_invite_id: invite.id },
           });
+          
+          // Process the job immediately in development mode
+          if (process.env.NODE_ENV !== 'production') {
+            // Dynamic import to avoid circular dependency
+            const { processJob } = await import('../../lib/worker');
+            await processJob(job.task_identifier, job.payload);
+          }
 
           // Commit the transaction
           await sql.query("COMMIT");
@@ -127,6 +134,7 @@ export async function POST(req: NextRequest) {
               name,
               primary_email: email,
               owner_user_id: ownerUserId,
+              brokerage_name,
             },
             user: {
               id: newUser.id,

@@ -15,6 +15,7 @@ interface Broker {
   name: string;
   primary_email: string;
   owner_user_id: number;
+  brokerage_name?: string;
   created_at?: string;
   updated_at?: string;
   invitation_sent_at?: string;
@@ -29,6 +30,7 @@ export default function AdminBrokersPage() {
     name: '',
     email: '',
     contactName: '',
+    brokerage_name: '',
   });
   const [addingBroker, setAddingBroker] = useState(false);
   const [addBrokerError, setAddBrokerError] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export default function AdminBrokersPage() {
 
       // Close the modal and reset the form
       setShowAddBrokerModal(false);
-      setNewBroker({ name: '', email: '', contactName: '' });
+      setNewBroker({ name: '', email: '', contactName: '', brokerage_name: '' });
       
       // Trigger a refresh
       setRefreshKey(prev => prev + 1);
@@ -265,6 +267,16 @@ export default function AdminBrokersPage() {
                     <span>{addBrokerError}</span>
                   </div>
                 )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="brokerage_name">Brokerage Name</Label>
+                  <Input
+                    id="brokerage_name"
+                    value={newBroker.brokerage_name}
+                    onChange={(e) => setNewBroker({ ...newBroker, brokerage_name: e.target.value })}
+                    required
+                  />
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="name">Broker Company Name</Label>

@@ -82,6 +82,24 @@ export async function getActiveInviteForUser(
   return invite || null;
 }
 
+export async function getUserInviteById(
+  id: number
+): Promise<s.user_invites.Selectable | null> {
+  const invite = await db
+    .selectOne("app.user_invites", { id })
+    .run(sql);
+
+  return invite || null;
+}
+
+export async function markUserInviteAsSent(
+  id: number
+): Promise<s.user_invites.Selectable | null> {
+  return await db
+    .update("app.user_invites", { sent_at: new Date() }, { id })
+    .run(sql);
+}
+
 export async function markUserInviteAsUsed(
   id: number
 ): Promise<s.user_invites.Selectable | null> {

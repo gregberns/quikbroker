@@ -81,10 +81,17 @@ export async function POST(
           });
 
           // Create a job to send the broker invitation email
-          await createJob({
+          const job = await createJob({
             task_identifier: "broker_email_invite",
             payload: { user_invite_id: invite.id },
           });
+          
+          // Process the job immediately in development mode
+          if (process.env.NODE_ENV !== 'production') {
+            // Dynamic import to avoid circular dependency
+            const { processJob } = await import('../../../../lib/worker');
+            await processJob(job.task_identifier, job.payload);
+          }
 
           // Update the broker record to indicate an invitation was sent
           const timestamp = new Date();

@@ -2,17 +2,17 @@
 
 # Tasks
 
-* Add Brokerage Name
+* [x] Add Brokerage Name
 
 Email: admin@quikbroker.com
-Password: admin123
+Password: ohbixmmmoicomrgd1400 (see ADMIN_CREDENTIALS.md for details)
 
 ## Admin Login
 
-* Tom logs in
-* Tom sends an Invite Email to a 'broker'
-* Broker clicks the link
-* Broker is logged into site
+* [x] Tom logs in
+* [x] Tom sends an Invite Email to a 'broker'
+* [x] Broker clicks the link
+* [x] Broker is logged into site
 
 ## Stuff
 
