@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, Plus, Loader2, AlertCircle, Mail, Eye, Edit, X, Building2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/dashboard/data-table';
+import { cn } from '@/lib/utils';
 
 interface Broker {
   id: number;
@@ -21,35 +28,37 @@ export default function AdminBrokersPage() {
   const [newBroker, setNewBroker] = useState({
     name: '',
     email: '',
-    contactName: '',  // Add new field for primary contact name
+    contactName: '',
   });
   const [addingBroker, setAddingBroker] = useState(false);
   const [addBrokerError, setAddBrokerError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0); // Used to trigger refresh of data
   const router = useRouter();
 
   // Fetch brokers from the API
   useEffect(() => {
-    const fetchBrokers = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/brokers');
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch brokers');
-        }
-
-        const data = await response.json();
-        setBrokers(data.brokers);
-      } catch (err) {
-        console.error('Error fetching brokers:', err);
-        setError('Failed to load brokers. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBrokers();
-  }, []);
+  }, [refreshKey]);
+
+  const fetchBrokers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/brokers');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch brokers');
+      }
+
+      const data = await response.json();
+      setBrokers(data.brokers);
+    } catch (err) {
+      console.error('Error fetching brokers:', err);
+      setError('Failed to load brokers. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddBroker = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,12 +81,12 @@ export default function AdminBrokersPage() {
 
       const data = await response.json();
 
-      // Add the new broker to the list
-      setBrokers([...brokers, data.broker]);
-
       // Close the modal and reset the form
       setShowAddBrokerModal(false);
       setNewBroker({ name: '', email: '', contactName: '' });
+      
+      // Trigger a refresh
+      setRefreshKey(prev => prev + 1);
     } catch (err) {
       console.error('Error adding broker:', err);
       setAddBrokerError(err instanceof Error ? err.message : 'Failed to add broker. Please try again.');
@@ -111,186 +120,208 @@ export default function AdminBrokersPage() {
     }
   };
 
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
-          <div>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="text-gray-600 hover:text-gray-900 mr-4"
-            >
-              &larr; Back to Dashboard
-            </button>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 inline-block">
-              Broker Management
-            </h1>
-          </div>
-          <button
-            onClick={() => setShowAddBrokerModal(true)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+  // Define columns for data table
+  const columns = [
+    {
+      key: 'name' as keyof Broker,
+      header: 'Company Name',
+      cell: (broker: Broker) => (
+        <Button
+          variant="link"
+          onClick={() => router.push(`/dashboard/admin/brokers/${broker.id}`)}
+          className="p-0 h-auto font-medium text-left justify-start hover:underline"
+        >
+          {broker.name}
+        </Button>
+      )
+    },
+    {
+      key: 'primary_email' as keyof Broker,
+      header: 'Email'
+    },
+    {
+      key: 'actions' as keyof Broker,
+      header: 'Actions',
+      className: 'text-right',
+      cell: (broker: Broker) => (
+        <div className="flex justify-end space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleSendInvite(broker.id)}
           >
-            Add New Broker
-          </button>
+            <Mail className="h-4 w-4 mr-1" />
+            Invite
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => router.push(`/dashboard/admin/brokers/${broker.id}`)}
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            View
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => alert(`Edit broker: ${broker.id}`)}
+          >
+            <Edit className="h-4 w-4 mr-1" />
+            Edit
+          </Button>
         </div>
-      </header>
+      )
+    }
+  ];
 
-      <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 sm:px-6 lg:px-8">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-gray-600">Loading brokers...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            <strong className="font-bold">Error: </strong>
-            <span className="block sm:inline">{error}</span>
-          </div>
-        ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Brokers</h2>
-              <p className="mt-1 text-sm text-gray-600">A list of all brokers in the system.</p>
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Button 
+            variant="ghost" 
+            onClick={() => router.push('/dashboard/admin')}
+            className="mr-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+          <h1 className="text-2xl font-bold">Broker Management</h1>
+        </div>
+        <Button 
+          onClick={() => setShowAddBrokerModal(true)}
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Add New Broker
+        </Button>
+      </div>
+
+      <Card>
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Brokers</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                A list of all brokers in the system.
+              </p>
             </div>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {brokers.map((broker) => (
-                  <tr key={broker.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      <button
-                        onClick={() => router.push(`/dashboard/admin/brokers/${broker.id}`)}
-                        className="text-gray-900 hover:text-blue-600 hover:underline"
-                      >
-                        {broker.name}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{broker.primary_email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleSendInvite(broker.id)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        Send Invite
-                      </button>
-                      <button
-                        onClick={() => router.push(`/dashboard/admin/brokers/${broker.id}`)}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() => alert(`Edit broker: ${broker.id}`)}
-                        className="text-green-600 hover:text-green-900 mr-4"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {brokers.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="px-6 py-4 text-center text-sm text-gray-500">
-                      No brokers found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => setRefreshKey(prev => prev + 1)} 
+                variant="outline"
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+              </Button>
+            </div>
           </div>
-        )}
-      </main>
+        </div>
+
+        <div className="p-0">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : error ? (
+            <div className="p-6">
+              <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded flex items-start" role="alert">
+                <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            </div>
+          ) : (
+            <DataTable 
+              data={brokers}
+              columns={columns}
+              searchable
+              searchPlaceholder="Search brokers..."
+              pagination
+              itemsPerPage={10}
+              emptyMessage="No brokers found."
+            />
+          )}
+        </div>
+      </Card>
 
       {/* Add Broker Modal */}
       {showAddBrokerModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Add New Broker</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="max-w-md w-full">
+            <div className="flex items-center justify-between border-b p-4">
+              <h3 className="text-lg font-medium flex items-center">
+                <Building2 className="h-5 w-5 mr-2 text-primary" />
+                Add New Broker
+              </h3>
+              <Button variant="ghost" size="icon" onClick={() => setShowAddBrokerModal(false)}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
 
             <form onSubmit={handleAddBroker}>
-              <div className="px-6 py-4 space-y-4">
+              <div className="p-6 space-y-4">
                 {addBrokerError && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm">
-                    {addBrokerError}
+                  <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded flex items-start">
+                    <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <span>{addBrokerError}</span>
                   </div>
                 )}
 
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Broker Company Name
-                  </label>
-                  <input
-                    type="text"
+                <div className="space-y-2">
+                  <Label htmlFor="name">Broker Company Name</Label>
+                  <Input
                     id="name"
                     value={newBroker.name}
                     onChange={(e) => setNewBroker({ ...newBroker, name: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     required
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <input
-                    type="email"
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
                     id="email"
+                    type="email"
                     value={newBroker.email}
                     onChange={(e) => setNewBroker({ ...newBroker, email: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     required
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="contactName" className="block text-sm font-medium text-gray-700">
-                    Primary Contact Name
-                  </label>
-                  <input
-                    type="text"
+                <div className="space-y-2">
+                  <Label htmlFor="contactName">Primary Contact Name</Label>
+                  <Input
                     id="contactName"
                     value={newBroker.contactName}
                     onChange={(e) => setNewBroker({ ...newBroker, contactName: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     required
                   />
                 </div>
               </div>
 
-              <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
-                <button
-                  type="button"
+              <div className="flex items-center justify-end gap-2 border-t p-4 bg-muted/20">
+                <Button 
+                  type="button" 
+                  variant="outline" 
                   onClick={() => setShowAddBrokerModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
+                </Button>
+                <Button 
+                  type="submit" 
                   disabled={addingBroker}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {addingBroker ? 'Adding...' : 'Add Broker'}
-                </button>
+                  {addingBroker ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : 'Add Broker'}
+                </Button>
               </div>
             </form>
-          </div>
+          </Card>
         </div>
       )}
-
-      <footer className="bg-white border-t border-gray-200 py-4">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-          &copy; 2025 QuikBroker. All rights reserved.
-        </div>
-      </footer>
     </div>
   );
 }

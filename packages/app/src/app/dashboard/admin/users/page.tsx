@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft, Search, Loader2, UserCog, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/dashboard/data-table';
+import { cn } from '@/lib/utils';
 
 interface User {
   id: number;
@@ -122,167 +129,187 @@ export default function UsersPage() {
     }).format(date);
   };
 
+  // Define columns for the data table
+  const columns = [
+    {
+      key: 'id' as keyof User,
+      header: 'ID',
+      className: 'font-medium'
+    },
+    {
+      key: 'email' as keyof User,
+      header: 'Email'
+    },
+    {
+      key: 'role' as keyof User,
+      header: 'Role',
+      cell: (user: User) => (
+        <span className={cn(
+          "px-2 py-1 text-xs font-medium rounded-full",
+          user.role === 'admin' && "bg-purple-100 text-purple-800",
+          user.role === 'broker' && "bg-green-100 text-green-800",
+          user.role === 'carrier' && "bg-blue-100 text-blue-800"
+        )}>
+          {user.role}
+        </span>
+      )
+    },
+    {
+      key: 'created_at' as keyof User,
+      header: 'Created At',
+      cell: (user: User) => formatDate(user.created_at)
+    },
+    {
+      key: 'broker_name' as keyof User,
+      header: 'Company',
+      cell: (user: User) => user.broker_name || 'N/A'
+    },
+    {
+      key: 'actions' as keyof User,
+      header: 'Actions',
+      className: 'text-right',
+      cell: (user: User) => (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => openPasswordModal(user)}
+          className="text-primary hover:text-primary/90"
+        >
+          <UserCog className="h-4 w-4 mr-1" />
+          Reset Password
+        </Button>
+      )
+    }
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex justify-between items-center">
-          <div>
-            <button
-              onClick={() => router.push('/dashboard/admin')}
-              className="text-gray-600 hover:text-gray-900 mr-4"
-            >
-              &larr; Back to Admin Dashboard
-            </button>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 inline-block">
-              User Management
-            </h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Button 
+            variant="ghost" 
+            onClick={() => router.push('/dashboard/admin')}
+            className="mr-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
+          </Button>
+          <h1 className="text-2xl font-bold">User Management</h1>
+        </div>
+      </div>
+
+      <Card>
+        <div className="p-6 border-b">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Users</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                A list of all users in the system.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={fetchUsers} 
+                variant="outline"
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+              </Button>
+            </div>
           </div>
         </div>
-      </header>
 
-      <main className="flex-1 mx-auto max-w-7xl w-full px-4 py-6 sm:px-6 lg:px-8">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-gray-600">Loading users...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            <strong className="font-bold">Error: </strong>
-            <span className="block sm:inline">{error}</span>
-          </div>
-        ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Users</h2>
-              <p className="mt-1 text-sm text-gray-600">A list of all users in the system.</p>
+        <div className="p-0">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'admin'
-                          ? 'bg-purple-100 text-purple-800'
-                          : user.role === 'broker'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(user.created_at)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.broker_name || 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => openPasswordModal(user)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Reset Password
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {users.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                      No users found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </main>
+          ) : error ? (
+            <div className="p-6">
+              <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded flex items-start" role="alert">
+                <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            </div>
+          ) : (
+            <DataTable 
+              data={users}
+              columns={columns}
+              searchable
+              searchPlaceholder="Search users..."
+              pagination
+              itemsPerPage={10}
+              emptyMessage="No users found."
+            />
+          )}
+        </div>
+      </Card>
 
       {/* Password Reset Modal */}
       {showPasswordModal && selectedUser && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Reset Password for {selectedUser.email}</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="max-w-md w-full">
+            <div className="flex items-center justify-between border-b p-4">
+              <h3 className="text-lg font-medium">Reset Password for {selectedUser.email}</h3>
+              <Button variant="ghost" size="icon" onClick={closePasswordModal}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
 
             <form onSubmit={handlePasswordReset}>
-              <div className="px-6 py-4 space-y-4">
+              <div className="p-6 space-y-4">
                 {resetSuccess && (
-                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative text-sm">
-                    Password reset successfully!
+                  <div className="bg-green-50 text-green-700 px-4 py-3 rounded border border-green-200 flex items-start">
+                    <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5 text-green-500" />
+                    <span>Password reset successfully!</span>
                   </div>
                 )}
 
                 {passwordError && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm">
-                    {passwordError}
+                  <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded flex items-start">
+                    <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <span>{passwordError}</span>
                   </div>
                 )}
 
-                <div>
-                  <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-                    New Password
-                  </label>
-                  <input
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
                     type="password"
                     id="newPassword"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     required
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 8 characters long
+                  </p>
                 </div>
 
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                    Confirm Password
-                  </label>
-                  <input
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
                     type="password"
                     id="confirmPassword"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     required
                   />
                 </div>
               </div>
 
-              <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
-                <button
-                  type="button"
-                  onClick={closePasswordModal}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
+              <div className="flex items-center justify-end gap-2 border-t p-4 bg-muted/20">
+                <Button type="button" variant="outline" onClick={closePasswordModal}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
+                </Button>
+                <Button type="submit">
                   Reset Password
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
+          </Card>
         </div>
       )}
-
-      <footer className="bg-white border-t border-gray-200 py-4">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-          &copy; 2025 QuikBroker. All rights reserved.
-        </div>
-      </footer>
     </div>
   );
 }
