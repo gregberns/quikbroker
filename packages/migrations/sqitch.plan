@@ -1,0 +1,15 @@
+%syntax-version=1.0.0
+%project=quikbroker
+%uri=https://github.com/yourusername/quikbroker/
+
+# The plan file will track all of our database changes
+# Migrations will be added here by the sqitch commands
+
+appschema 2023-05-02T12:00:00Z QuikBroker Team <dev@quikbroker.com> # Add schema for all app objects
+updated_at_function [appschema] 2023-05-02T12:01:00Z QuikBroker Team <dev@quikbroker.com> # Add function to update timestamp on record changes
+users_table [appschema updated_at_function] 2023-05-02T12:02:00Z QuikBroker Team <dev@quikbroker.com> # Add users table
+brokers_table [appschema updated_at_function users_table] 2023-05-02T12:03:00Z QuikBroker Team <dev@quikbroker.com> # Add brokers table
+carriers_table [appschema updated_at_function] 2023-05-02T12:04:00Z QuikBroker Team <dev@quikbroker.com> # Add carriers table
+user_invites_table [appschema updated_at_function users_table] 2023-05-02T12:05:00Z QuikBroker Team <dev@quikbroker.com> # Add user invites table
+jobs_table [appschema updated_at_function] 2023-05-02T12:06:00Z QuikBroker Team <dev@quikbroker.com> # Add jobs table for background processing
+signups_table [appschema updated_at_function] 2023-05-02T12:07:00Z QuikBroker Team <dev@quikbroker.com> # Add signups table for tracking new registrations

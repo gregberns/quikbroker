@@ -36,24 +36,17 @@ services:
 
   migrate:
     build:
-      context: .
-      dockerfile: ./packages/schema/Dockerfile
+      context: ./packages/migrations
+      dockerfile: Dockerfile
     volumes:
       - type: bind
         source: ./scripts
         target: /scripts
-      # - type: bind
-      #   source: ./packages/schema/dumps
-      #   target: /app/dumps
     depends_on:
       db:
         condition: service_healthy
     env_file:
       - .env
-    entrypoint: [""]
-    # Inspired by: https://docs.docker.com/compose/startup-order/
-    # command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'yarn', 'migrate' ]
-    # command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'docker-entrypoint.sh' ]
-    command: ["docker-entrypoint.sh"]
-    # networks:
-    #   - default
+    environment:
+      - SQITCH_TARGET=db:pg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    command: ['deploy']

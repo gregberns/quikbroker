@@ -1,0 +1,12 @@
+{
+  "name": "@quikbroker/migrations",
+  "version": "1.0.0",
+  "description": "Database migrations for QuikBroker",
+  "scripts": {
+    "deploy": "sqitch deploy",
+    "revert": "sqitch revert",
+    "verify": "sqitch verify",
+    "deploy:prod": "sqitch deploy db:pg://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME",
+    "bundle": "sqitch bundle --dest-dir ./dist"
+  }
+}
