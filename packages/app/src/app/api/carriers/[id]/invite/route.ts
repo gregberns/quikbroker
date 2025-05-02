@@ -60,8 +60,8 @@ export async function POST(
         const timestamp = new Date();
         await db
           .update(
-            // @ts-expect-error fuck typescript
-            "carriers",
+            // Using string directly because of schema issues
+            "carriers" as unknown,
             { invitation_sent_at: timestamp },
             { id: carrierId }
           )
