@@ -98,6 +98,9 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=sha,format=short
+          # Output a single tag for easy processing
+          sep-tags: ","
+          sep-labels: ","
 
       - name: Build and push migrations image
         id: build-migrations
@@ -114,7 +117,8 @@ jobs:
       - name: Set migrations image tag
         id: migrations-tag
         run: |
-          FIRST_TAG=$(echo "${{ steps.migrations-meta.outputs.tags }}" | cut -d',' -f1)
+          # Extract first tag (now using comma as separator)
+          FIRST_TAG=$(echo "${{ steps.migrations-meta.outputs.tags }}" | cut -d',' -f1 | xargs)
           echo "image=$FIRST_TAG" >> $GITHUB_OUTPUT
           echo "Using migrations image tag: $FIRST_TAG"
 
@@ -130,6 +134,9 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=sha,format=short
+          # Output a single tag for easy processing
+          sep-tags: ","
+          sep-labels: ","
 
       - name: Build and push app image
         id: build-app
@@ -146,7 +153,8 @@ jobs:
       - name: Set app image tag
         id: app-tag
         run: |
-          FIRST_TAG=$(echo "${{ steps.app-meta.outputs.tags }}" | cut -d',' -f1)
+          # Extract first tag (now using comma as separator)
+          FIRST_TAG=$(echo "${{ steps.app-meta.outputs.tags }}" | cut -d',' -f1 | xargs)
           echo "image=$FIRST_TAG" >> $GITHUB_OUTPUT
           echo "Using app image tag: $FIRST_TAG"
 
