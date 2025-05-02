@@ -98,12 +98,24 @@ This will:
 
 ## CI/CD Integration
 
-This package is automatically deployed by GitHub Actions:
+This package is automatically built and deployed as part of the main QuikBroker CI/CD pipeline in GitHub Actions:
 
-1. On push to `main` or when manually triggered
-2. The migrations Docker image is built and pushed to GitHub Container Registry
-3. Migrations are run before the application deployment
-4. All database changes must pass verification
+1. The workflow is triggered on:
+   - Push to `main` branch
+   - Any tag with format `v*` (e.g., v1.0.0)
+   - Pull requests to `main` (build only, no deployment)
+   - Manual workflow dispatch
+
+2. Pipeline Stages:
+   - **Build**: The migrations Docker image is built and pushed to GitHub Container Registry
+   - **Test**: Runs any configured tests (currently a placeholder)
+   - **Migrate**: Runs database migrations before application deployment
+   - **Deploy**: Deploys the application to Railway
+
+3. Dependencies:
+   - Migrations always run before application deployment
+   - Migrations only run on pushes to main, version tags, or manual triggers
+   - All stages must succeed for deployment to proceed
 
 ## Directory Structure
 

@@ -2,6 +2,16 @@
 
 This document lists all the GitHub Secrets required for the QuikBroker CI/CD deployment process.
 
+## CI/CD Workflow
+
+The QuikBroker project uses a consolidated CI/CD pipeline implemented in `.github/workflows/ci-cd.yml`. This workflow handles:
+
+1. Building Docker images for both the application and migrations
+2. Running database migrations
+3. Deploying the application to Railway
+
+The workflow is triggered on pushes to the `main` branch, version tags, pull requests, and manual triggers.
+
 ## Required Secrets
 
 ### Database Connection Secrets
