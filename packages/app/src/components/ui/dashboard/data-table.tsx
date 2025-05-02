@@ -46,7 +46,7 @@ export function DataTable<T extends { id: string | number }>({
   // Filter data based on search term
   const filteredData = searchable && searchTerm
     ? data.filter(item => 
-        Object.entries(item).some(([key, value]) => 
+        Object.entries(item).some(([, value]) => 
           value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
       )

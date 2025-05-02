@@ -101,8 +101,9 @@ function SignupForm() {
         throw new Error(data.message || 'Submission failed');
       }
       setSuccessMessage('Thank you! We have received your information and will be in touch shortly.');
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -265,11 +266,11 @@ function SignupForm() {
                       </li>
                       <li className="flex items-baseline gap-2">
                         <span className="font-medium text-foreground">2.</span>
-                        <span>We'll schedule a personalized demo of the platform</span>
+                        <span>We&apos;ll schedule a personalized demo of the platform</span>
                       </li>
                       <li className="flex items-baseline gap-2">
                         <span className="font-medium text-foreground">3.</span>
-                        <span>You'll receive a custom implementation plan</span>
+                        <span>You&apos;ll receive a custom implementation plan</span>
                       </li>
                     </ol>
                   </div>

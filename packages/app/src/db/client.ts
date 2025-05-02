@@ -1,5 +1,6 @@
 import { Pool } from "pg";
-import * as db from "zapatos/db";
+// Using zapatos DB utilities
+import "zapatos/db";
 
 const pool = new Pool({
   connectionString: process.env.POSTGRES_CONNECTION,

@@ -7,6 +7,9 @@ Copyright (C) 2020 - 2023 George MacKerron
 Released under the MIT licence: see LICENCE file
 */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 declare module 'zapatos/schema' {
 
   import type * as db from 'zapatos/db';
@@ -17,7 +20,7 @@ declare module 'zapatos/schema' {
 
   /* === schema: 0 === */
 
-  export namespace 0 {
+  export namespace schema0 {
   
     /* --- enums --- */
     /* (none) */
@@ -49,21 +52,21 @@ declare module 'zapatos/schema' {
   /* === global aggregate types === */
 
   export type Schema = '0';
-  export type Table = 0.Table;
-  export type Selectable = 0.Selectable;
-  export type JSONSelectable = 0.JSONSelectable;
-  export type Whereable = 0.Whereable;
-  export type Insertable = 0.Insertable;
-  export type Updatable = 0.Updatable;
-  export type UniqueIndex = 0.UniqueIndex;
-  export type Column = 0.Column;
+  export type Table = schema0.Table;
+  export type Selectable = schema0.Selectable;
+  export type JSONSelectable = schema0.JSONSelectable;
+  export type Whereable = schema0.Whereable;
+  export type Insertable = schema0.Insertable;
+  export type Updatable = schema0.Updatable;
+  export type UniqueIndex = schema0.UniqueIndex;
+  export type Column = schema0.Column;
 
   export type AllSchemas = ['0'];
-  export type AllBaseTables = [...0.AllBaseTables];
-  export type AllForeignTables = [...0.AllForeignTables];
-  export type AllViews = [...0.AllViews];
-  export type AllMaterializedViews = [...0.AllMaterializedViews];
-  export type AllTablesAndViews = [...0.AllTablesAndViews];
+  export type AllBaseTables = [...schema0.AllBaseTables];
+  export type AllForeignTables = [...schema0.AllForeignTables];
+  export type AllViews = [...schema0.AllViews];
+  export type AllMaterializedViews = [...schema0.AllMaterializedViews];
+  export type AllTablesAndViews = [...schema0.AllTablesAndViews];
 
 
   /* === lookups === */

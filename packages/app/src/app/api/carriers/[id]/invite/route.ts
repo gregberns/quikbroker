@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "../../../../lib/auth";
 import { getCarrierById } from "@/db/queries/carriers";
 
-import * as crypto from "crypto";
+// import * as crypto from "crypto";
 import { sql } from "@/db/client";
 import * as db from "zapatos/db";
 

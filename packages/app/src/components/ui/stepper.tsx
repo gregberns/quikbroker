@@ -25,7 +25,9 @@ export const Step = ({ title, description, status = "upcoming" }: StepProps) => 
 export const Stepper: React.FC<StepperProps> = ({ currentStep, children }) => {
   // Filter out non-Step children and only take Step components
   const steps = React.Children.toArray(children).filter(
-    (child) => React.isValidElement(child) && (child.type as any).name === "Step"
+    (child) => React.isValidElement(child) && 
+    typeof child.type === 'function' && 
+    child.type.name === "Step"
   ) as React.ReactElement[];
 
   return (

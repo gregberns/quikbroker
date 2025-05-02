@@ -23,7 +23,7 @@ export function Testimonial({
     <Card className={cn("h-full", className)}>
       <CardContent className="p-6">
         <div className="flex flex-col h-full">
-          <div className="mb-4 text-3xl text-muted-foreground">"</div>
+          <div className="mb-4 text-3xl text-muted-foreground">&quot;</div>
           <p className="flex-grow text-muted-foreground mb-6">
             {quote}
           </p>

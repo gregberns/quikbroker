@@ -61,7 +61,7 @@ export const clientLogger = {
   /**
    * Log an error
    */
-  error(type: string, message: string, metadata?: Record<string, any>): void {
+  error(type: string, message: string, metadata?: Record<string, unknown>): void {
     logToServer({
       level: 'ERROR',
       type,
@@ -73,7 +73,7 @@ export const clientLogger = {
   /**
    * Log a warning
    */
-  warn(type: string, message: string, metadata?: Record<string, any>): void {
+  warn(type: string, message: string, metadata?: Record<string, unknown>): void {
     logToServer({
       level: 'WARN',
       type,
@@ -85,7 +85,7 @@ export const clientLogger = {
   /**
    * Log an informational message
    */
-  info(type: string, message: string, metadata?: Record<string, any>): void {
+  info(type: string, message: string, metadata?: Record<string, unknown>): void {
     logToServer({
       level: 'INFO',
       type,
@@ -97,7 +97,7 @@ export const clientLogger = {
   /**
    * Log a debug message
    */
-  debug(type: string, message: string, metadata?: Record<string, any>): void {
+  debug(type: string, message: string, metadata?: Record<string, unknown>): void {
     // Only log debug messages in development
     if (process.env.NODE_ENV !== 'production') {
       logToServer({
@@ -117,7 +117,7 @@ async function logToServer(logData: {
   level: string;
   type: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }): Promise<void> {
   try {
     await fetch('/api/log-error', {

@@ -1,7 +1,7 @@
 import { getUserById } from '@/db/queries/users';
 import { getUserInviteById, markUserInviteAsSent } from '@/db/queries/userInvites';
 import { getBrokerById } from '@/db/queries/brokers';
-import { sendEmail, getBrokerInviteEmail, getCarrierInviteEmail } from './email';
+import { sendEmail, getBrokerInviteEmail } from './email';
 import { logErrorToServer } from './errorHandling';
 import { getClient } from '@/db/client';
 
@@ -84,11 +84,11 @@ export async function processBrokerEmailInvite(payload: { user_invite_id: number
 }
 
 // Function to process job based on task type
-export async function processJob(taskIdentifier: string, payload: any) {
+export async function processJob(taskIdentifier: string, payload: Record<string, unknown>) {
   try {
     switch (taskIdentifier) {
       case 'broker_email_invite':
-        await processBrokerEmailInvite(payload);
+        await processBrokerEmailInvite(payload as { user_invite_id: number });
         break;
       // Add more job types here
       default:

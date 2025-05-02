@@ -48,9 +48,10 @@ export function SignupForm({
       
       // Redirect to signup page with email as query param
       router.push(`${redirectPath}?email=${encodeURIComponent(email)}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signup submission error:", err);
-      setError(err.message || 'An unexpected error occurred.');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -7,8 +7,9 @@ import { getClient } from "@/db/client";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
+  const { params } = context;
   return requireAuth(req, async (req, session) => {
     try {
       const brokerId = parseInt(params.id);
@@ -58,8 +59,9 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
+  const { params } = context;
   return requireAuth(
     req,
     async (req, session) => {

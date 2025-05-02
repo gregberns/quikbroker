@@ -207,7 +207,7 @@ export default function CarrierProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, idx) => (
+              {recentActivity.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
                   <div className={`p-2 rounded-full flex-shrink-0 ${
                     activity.type === 'document_verified' ? 'bg-green-100' : 

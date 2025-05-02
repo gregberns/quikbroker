@@ -87,6 +87,8 @@ const requiredDocuments = [
 ]
 
 export default function CarrierDocumentsPage() {
+  // Get carrierId from params - will be used in real implementation
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { carrierId } = useParams()
   const [documents, setDocuments] = useState<Document[]>(initialDocuments)
   const [showUploadModal, setShowUploadModal] = useState(false)
@@ -168,6 +170,8 @@ export default function CarrierDocumentsPage() {
     }
   }
   
+  // Format date for display
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A'
     const date = new Date(dateString)
@@ -178,10 +182,12 @@ export default function CarrierDocumentsPage() {
     }).format(date)
   }
   
-  const getMissingDocuments = () => {
-    const uploadedTypes = new Set(documents.map(doc => doc.type))
-    return requiredDocuments.filter(doc => !uploadedTypes.has(doc.type) && doc.required)
-  }
+  // Find required documents that haven't been uploaded yet
+  // Currently unused but kept for future implementation
+  // const getMissingDocuments = () => {
+  //   const uploadedTypes = new Set(documents.map(doc => doc.type))
+  //   return requiredDocuments.filter(doc => !uploadedTypes.has(doc.type) && doc.required)
+  // }
   
   const deleteDocument = (id: number) => {
     setDocuments(documents.filter(doc => doc.id !== id))

@@ -44,7 +44,7 @@ export interface LogEntry {
   level: LogLevel;
   type: string;
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -82,7 +82,7 @@ function writeToLogFile(severity: LogSeverity, logEntry: LogEntry): void {
 /**
  * Extract useful information from a NextRequest for logging
  */
-export function getRequestInfo(req: NextRequest): Record<string, any> {
+export function getRequestInfo(req: NextRequest): Record<string, unknown> {
   return {
     url: req.url,
     method: req.method,
@@ -99,7 +99,7 @@ export const serverLogger = {
   /**
    * Log an error
    */
-  error(type: string, message: string, metadata?: Record<string, any>): void {
+  error(type: string, message: string, metadata?: Record<string, unknown>): void {
     writeToLogFile(LogSeverity.ERROR, {
       timestamp: new Date().toISOString(),
       level: LogLevel.ERROR,
@@ -112,7 +112,7 @@ export const serverLogger = {
   /**
    * Log a warning
    */
-  warn(type: string, message: string, metadata?: Record<string, any>): void {
+  warn(type: string, message: string, metadata?: Record<string, unknown>): void {
     writeToLogFile(LogSeverity.ERROR, {
       timestamp: new Date().toISOString(),
       level: LogLevel.WARN,
@@ -125,7 +125,7 @@ export const serverLogger = {
   /**
    * Log an informational message
    */
-  info(type: string, message: string, metadata?: Record<string, any>): void {
+  info(type: string, message: string, metadata?: Record<string, unknown>): void {
     writeToLogFile(LogSeverity.INFO, {
       timestamp: new Date().toISOString(),
       level: LogLevel.INFO,
@@ -138,7 +138,7 @@ export const serverLogger = {
   /**
    * Log a debug message
    */
-  debug(type: string, message: string, metadata?: Record<string, any>): void {
+  debug(type: string, message: string, metadata?: Record<string, unknown>): void {
     // Only log debug messages in development
     if (process.env.NODE_ENV !== 'production') {
       writeToLogFile(LogSeverity.INFO, {
@@ -154,7 +154,7 @@ export const serverLogger = {
   /**
    * Log an API access entry
    */
-  access(req: NextRequest, statusCode: number, metadata?: Record<string, any>): void {
+  access(req: NextRequest, statusCode: number, metadata?: Record<string, unknown>): void {
     writeToLogFile(LogSeverity.ACCESS, {
       timestamp: new Date().toISOString(),
       level: LogLevel.INFO,
@@ -171,7 +171,7 @@ export const serverLogger = {
   /**
    * Log an API error
    */
-  apiError(req: NextRequest, error: any, statusCode: number = 500): void {
+  apiError(req: NextRequest, error: unknown, statusCode: number = 500): void {
     writeToLogFile(LogSeverity.ERROR, {
       timestamp: new Date().toISOString(),
       level: LogLevel.ERROR,
@@ -188,7 +188,7 @@ export const serverLogger = {
   /**
    * Log a security event
    */
-  security(type: string, message: string, metadata?: Record<string, any>): void {
+  security(type: string, message: string, metadata?: Record<string, unknown>): void {
     writeToLogFile(LogSeverity.ERROR, {
       timestamp: new Date().toISOString(),
       level: LogLevel.WARN,
