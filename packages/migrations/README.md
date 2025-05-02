@@ -1,81 +1,135 @@
 # QuikBroker Database Migrations
 
-This package manages database migrations for the QuikBroker application using Sqitch.
+This package manages database migrations for the QuikBroker application using Sqitch, a database change management system that uses SQL for migrations and plain scripts for deployment.
 
 ## Getting Started
 
-1. Install Sqitch following the [official installation guide](https://sqitch.org/download/)
-2. Configure your database connection in sqitch.conf or use environment variables
+### Prerequisites
+
+To work with the migrations locally, you need:
+
+1. [Sqitch](https://sqitch.org/download/) installed on your machine
+2. PostgreSQL client tools (psql)
+3. Database access credentials
+
+### Installation
+
+If you're using the Docker-based workflow, no local installation is needed. Otherwise, install Sqitch by following the [official installation guide](https://sqitch.org/download/).
 
 ## Usage
 
-### Development
+### Running Migrations with Docker
+
+The simplest way to run migrations is using Docker:
 
 ```bash
-# Deploy all pending changes
-sqitch deploy
-
-# Revert the last change
-sqitch revert --to @HEAD^
-
-# Verify all deployed changes
-sqitch verify
-
-# Add a new change
-sqitch add change_name --requires dependency_name -n "Description of the change"
-```
-
-### Adding a New Migration
-
-```bash
-# Create a new migration for a table
-sqitch add users --requires appschema -n "Creates users table"
-
-# This creates:
-# - deploy/users.sql (the SQL to create the table)
-# - revert/users.sql (the SQL to revert the change)
-# - verify/users.sql (SQL to verify the change was applied)
-```
-
-### Running in Docker
-
-```bash
-# Build the Docker image
-docker build -t quikbroker/migrations .
+# Build the migrations image
+docker build -t quikbroker/migrations ./packages/migrations
 
 # Run migrations
 docker run --rm \
-  -e SQITCH_TARGET=db:pg://user:password@host:port/database \
-  quikbroker/migrations
+  -e DB_HOST=your-db-host \
+  -e DB_PORT=5432 \
+  -e DB_NAME=your-db-name \
+  -e DB_USER=your-db-user \
+  -e DB_PASSWORD=your-db-password \
+  quikbroker/migrations deploy
 ```
 
-### CI Integration
-
-The `scripts/deploy.sh` script can be used in CI environments:
+### Running Migrations Locally
 
 ```bash
-# Run migrations in CI
-./scripts/deploy.sh
+# Navigate to the migrations package
+cd packages/migrations
+
+# Deploy all pending changes
+./sqitch deploy db:pg://username:password@hostname:port/database_name
+
+# Verify all deployed changes
+./sqitch verify db:pg://username:password@hostname:port/database_name
+
+# Use the deploy script (uses environment variables)
+export DB_HOST=your-db-host
+export DB_PORT=5432
+export DB_NAME=your-db-name
+export DB_USER=your-db-user
+export DB_PASSWORD=your-db-password
+yarn deploy-script
 ```
 
-Required environment variables:
-- DB_USER
-- DB_PASSWORD
-- DB_HOST
-- DB_NAME
-- DB_PORT (defaults to 5432 if not specified)
+### Testing Migrations
 
-## Best Practices
+Before pushing changes, test your migrations in a dedicated testing environment:
 
-1. Always include proper dependencies between changes
-2. Write idempotent deployment scripts when possible
-3. Thoroughly test changes before deploying to production
-4. Test both deployment and reversion of changes
-5. Use transactions when appropriate
+```bash
+# Run the test script which creates a temporary database
+yarn test-migrations
+```
+
+## Adding New Migrations
+
+### Create a New Change
+
+```bash
+# Add a new migration (from the packages/migrations directory)
+./sqitch add new_feature --requires dependency_name -n "Description of the change"
+```
+
+This will:
+1. Create `deploy/new_feature.sql` for your SQL changes
+2. Create `verify/new_feature.sql` for verification logic
+3. Create an empty `revert/new_feature.sql` file (not used in our workflow)
+4. Update `sqitch.plan` with the new change
+
+### Writing Migration Files
+
+1. **Deploy script** (`deploy/new_feature.sql`):
+   - Write your SQL changes (CREATE TABLE, ALTER TABLE, etc.)
+   - Always wrap in BEGIN/COMMIT blocks for transactions
+   - Include proper schema references (app, app_private, app_hidden)
+
+2. **Verify script** (`verify/new_feature.sql`):
+   - Include queries that will fail if the migration was not applied correctly
+   - Typically SELECT statements with WHERE FALSE to validate schema
+   - For functions, use has_function_privilege() checks
+
+3. **Dependencies**:
+   - In `sqitch.plan`, ensure proper dependencies are listed
+
+## CI/CD Integration
+
+This package is automatically deployed by GitHub Actions:
+
+1. On push to `main` or when manually triggered
+2. The migrations Docker image is built and pushed to GitHub Container Registry
+3. Migrations are run before the application deployment
+4. All database changes must pass verification
 
 ## Directory Structure
 
-- `deploy/` - SQL scripts for deploying changes
-- `revert/` - SQL scripts for reverting changes
-- `verify/` - SQL scripts for verifying changes
-- `scripts/` - Helper scripts for CI/CD
+```
+migrations/
+├── deploy/             # SQL scripts for deploying changes
+├── verify/             # SQL scripts for verifying changes
+├── revert/             # Empty placeholder files (not used)
+├── sqitch.conf         # Sqitch configuration
+├── sqitch.plan         # Deployment plan
+├── sqitch              # Sqitch binary (in the Docker container)
+├── scripts/            # Helper scripts
+└── Dockerfile          # Docker image definition
+```
+
+## Best Practices
+
+1. **Idempotent Scripts**: Write deploy scripts that can be run multiple times without side effects.
+2. **Explicit Dependencies**: Always specify dependencies between changes.
+3. **Verification**: Include thorough verification scripts that will fail if migrations didn't work.
+4. **Transactional DDL**: Wrap changes in transactions where possible.
+5. **Incremental Changes**: Make smaller, focused changes rather than massive alterations.
+6. **Testing**: Always test migrations before submitting PRs.
+
+## Troubleshooting
+
+- **Connection Issues**: Check your database credentials and network connectivity
+- **Permission Errors**: Verify your database user has sufficient privileges
+- **Conflict Errors**: If objects already exist, consider using IF NOT EXISTS clauses

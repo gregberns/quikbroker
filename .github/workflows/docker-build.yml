@@ -2,9 +2,9 @@ name: Docker Build and Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   REGISTRY: ghcr.io
@@ -34,22 +34,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Log in to Fly.io
-      #   uses: superfly/flyctl-actions/setup-flyctl@master
-      #   with:
-      #     app: ${{ env.FLY_APP }}
-      #   env:
-      #     FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Log in to Fly.io Registry
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ${{ env.FLY_REGISTRY }}
-      #     username: ${{ secrets.FLY_API_TOKEN }}
-      #     password: x
-
-      # Build and push the app image
       - name: Extract metadata for app image
         id: app-meta
         uses: docker/metadata-action@v5
@@ -90,74 +74,3 @@ jobs:
             echo "APP_IMAGE_TAG=$FIRST_TAG" >> $GITHUB_ENV
           fi
           echo "Using app image tag: $APP_IMAGE_TAG"
-
-      # - name: Tag and push app image to Fly.io Registry
-      #   run: |
-      #     echo "Pulling app image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/app:$APP_IMAGE_TAG"
-      #     docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/app:$APP_IMAGE_TAG
-          
-      #     echo "Tagging app for Fly.io: ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$APP_IMAGE_TAG"
-      #     docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/app:$APP_IMAGE_TAG ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$APP_IMAGE_TAG
-          
-      #     echo "Pushing app to Fly.io Registry: ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$APP_IMAGE_TAG"
-      #     docker push ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$APP_IMAGE_TAG
-
-      # Build schema image (only for running migrations)
-      # - name: Build schema image for migrations
-      #   id: build-schema
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     file: ./packages/schema/Dockerfile
-      #     push: false
-      #     load: true
-      #     tags: schema-migrations:latest
-      #     cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/schema:buildcache
-      #     cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/schema:buildcache,mode=max
-
-      # Run schema migrations
-      # - name: Run Schema Migrations
-      #   # uses: superfly/flyctl-actions/setup-flyctl@master
-      #   # with:
-      #   #   app: ${{ env.FLY_APP }}
-      #   env:
-      #     FLY_ACCESS_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     flyctl apps list
-
-      #     echo "LIST RETRIEVED"
-  
-      #     # The database is most likely not running, so we need to start it
-      #     # flyctl apps restart ${{ env.FLY_APP_DB }} --access-token ${{ secrets.FLY_API_TOKEN }}
-      #     # sleep 20  # Wait for database to start
-
-      #     echo "AFTER SLEEP 1"
-
-      #     flyctl proxy 5432:5432 -a ${{ env.FLY_APP_DB }} &
-          
-      #     echo "AFTER PROXY"
-          
-      #     sleep 20  # Wait for proxy to initialize
-          
-      #     echo "AFTER SLEEP 2"
-
-      #     # Run the Schema Migration using the local image
-      #     # docker run --rm -p 5432:5432 schema-migrations:latest
-          
-      #     yarn schema:migrate
-          
-      #     EXIT_CODE=$?
-      #     if [ $EXIT_CODE -ne 0 ]; then
-      #       echo "Schema migrations failed with exit code $EXIT_CODE"
-      #       exit $EXIT_CODE
-      #     fi
-
-      # Deploy to Fly.io if on main branch
-      # - name: Deploy to Fly.io
-      #   if: github.ref == 'refs/heads/main'
-      #   run: |
-      #     echo "Deploying app image to Fly.io: ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$APP_IMAGE_TAG"
-      #     flyctl deploy --image ${{ env.FLY_REGISTRY }}/${{ env.FLY_APP }}:$APP_IMAGE_TAG -a ${{ env.FLY_APP }}
-      #   env:
-      #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
