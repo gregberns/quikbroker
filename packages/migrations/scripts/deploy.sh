@@ -19,9 +19,9 @@ DB_PORT=${DB_PORT:-5432}
 echo "Deploying database migrations to $DB_HOST:$DB_PORT/$DB_NAME..."
 
 # Deploy all pending changes to the target database
-sqitch deploy "db:pg://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
+./sqitch deploy "db:pg://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
 
 # Verify all changes
-sqitch verify "db:pg://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
+./sqitch verify "db:pg://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
 
 echo "Database migration completed successfully"

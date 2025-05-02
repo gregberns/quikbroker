@@ -10,11 +10,9 @@ CREATE TABLE IF NOT EXISTS app.brokers (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    name VARCHAR(255) NOT NULL,
-    primary_email VARCHAR(255) NOT NULL UNIQUE,
+    brokerage_name VARCHAR(255),
     owner_user_id INTEGER REFERENCES app.users(id),
-    invitation_sent_at TIMESTAMP,
-    brokerage_name VARCHAR(255)
+    invitation_sent_at TIMESTAMP
 );
 
 -- Add trigger to update the updated_at column (drop first if exists)

@@ -3,7 +3,7 @@
 BEGIN;
 
 -- Verify table exists and has expected columns
-SELECT id, created_at, updated_at, name, primary_email, owner_user_id, invitation_sent_at, brokerage_name
+SELECT id, created_at, updated_at, brokerage_name, owner_user_id, invitation_sent_at
 FROM app.brokers
 WHERE FALSE;
 
