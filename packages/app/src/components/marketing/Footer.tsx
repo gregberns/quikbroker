@@ -6,28 +6,28 @@ import { Container } from '@/components/ui/container';
 // Footer content can be easily updated by marketing
 const footerLinks = {
   company: [
-    { label: 'About Us', href: '/about' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Press', href: '/press' },
+    { label: 'About Us', href: { pathname: '/about' } },
+    { label: 'Careers', href: { pathname: '/careers' } },
+    { label: 'Blog', href: { pathname: '/blog' } },
+    { label: 'Press', href: { pathname: '/press' } },
   ],
   product: [
-    { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '/pricing' },
-    { label: 'Security', href: '/security' },
-    { label: 'Enterprise', href: '/enterprise' },
+    { label: 'Features', href: { pathname: '#features' } },
+    { label: 'Pricing', href: { pathname: '/pricing' } },
+    { label: 'Security', href: { pathname: '/security' } },
+    { label: 'Enterprise', href: { pathname: '/enterprise' } },
   ],
   resources: [
-    { label: 'Documentation', href: '/docs' },
-    { label: 'Knowledge Base', href: '/knowledge-base' },
-    { label: 'Support', href: '/support' },
-    { label: 'API', href: '/api' },
+    { label: 'Documentation', href: { pathname: '/docs' } },
+    { label: 'Knowledge Base', href: { pathname: '/knowledge-base' } },
+    { label: 'Support', href: { pathname: '/support' } },
+    { label: 'API', href: { pathname: '/api' } },
   ],
   legal: [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'FMCSA Compliance', href: '/compliance' },
-    { label: 'Security Practices', href: '/security-practices' },
+    { label: 'Privacy Policy', href: { pathname: '/privacy' } },
+    { label: 'Terms of Service', href: { pathname: '/terms' } },
+    { label: 'FMCSA Compliance', href: { pathname: '/compliance' } },
+    { label: 'Security Practices', href: { pathname: '/security-practices' } },
   ],
 };
 
@@ -37,7 +37,7 @@ export function Footer() {
       <Container>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           <div className="col-span-2">
-            <Link href="/" className="inline-block mb-4">
+            <Link href={{ pathname: "/" }} className="inline-block mb-4">
               <span className="font-bold text-xl text-primary">QuikBroker</span>
             </Link>
             <p className="text-muted-foreground max-w-xs">
@@ -69,7 +69,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">Company</h3>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
-                <li key={link.href}>
+                <li key={link.href.pathname}>
                   <Link href={link.href} className="text-muted-foreground hover:text-foreground">
                     {link.label}
                   </Link>
@@ -82,7 +82,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">Product</h3>
             <ul className="space-y-2">
               {footerLinks.product.map((link) => (
-                <li key={link.href}>
+                <li key={link.href.pathname}>
                   <Link href={link.href} className="text-muted-foreground hover:text-foreground">
                     {link.label}
                   </Link>
@@ -95,7 +95,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">Resources</h3>
             <ul className="space-y-2">
               {footerLinks.resources.map((link) => (
-                <li key={link.href}>
+                <li key={link.href.pathname}>
                   <Link href={link.href} className="text-muted-foreground hover:text-foreground">
                     {link.label}
                   </Link>
@@ -110,7 +110,7 @@ export function Footer() {
           </p>
           <ul className="mt-4 md:mt-0 flex flex-wrap gap-6">
             {footerLinks.legal.map((link) => (
-              <li key={link.href}>
+              <li key={link.href.pathname}>
                 <Link href={link.href} className="text-xs text-muted-foreground hover:text-foreground">
                   {link.label}
                 </Link>

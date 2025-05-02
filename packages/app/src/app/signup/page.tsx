@@ -116,7 +116,7 @@ function SignupForm() {
       <main className="flex-grow">
         <div className="bg-gradient-to-b from-primary/5 to-background">
           <Container className="py-8 md:py-12">
-            <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8">
+            <Link href={{ pathname: "/" }} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-8">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Home
             </Link>

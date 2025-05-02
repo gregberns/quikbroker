@@ -466,6 +466,31 @@ interface DocumentCardProps {
 }
 
 function DocumentCard({ document, onDelete }: DocumentCardProps) {
+  // Format date helper function
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    }).format(date);
+  };
+  
+  // Helper function for status icons
+  const getStatusIcon = (status: DocumentStatus) => {
+    switch (status) {
+      case 'verified':
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case 'pending':
+        return <Clock className="h-5 w-5 text-amber-500" />;
+      case 'expired':
+      case 'rejected':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <FileText className="h-5 w-5" />;
+    }
+  };
   return (
     <Card>
       <CardContent className="p-0">

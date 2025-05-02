@@ -11,11 +11,11 @@ interface HeroSectionProps {
   subtitle?: string;
   primaryCta?: {
     text: string;
-    href: string;
+    href: { pathname: string };
   };
   secondaryCta?: {
     text: string;
-    href: string;
+    href: { pathname: string };
   };
   highlights?: string[];
   className?: string;
@@ -26,8 +26,8 @@ interface HeroSectionProps {
 export function HeroSection({
   title = "Streamline Carrier Onboarding & Compliance Management",
   subtitle = "QuikBroker helps freight brokers reduce risk, ensure compliance, and accelerate carrier onboarding with automated document verification and real-time monitoring.",
-  primaryCta = { text: "Get Started", href: "#signup-form" },
-  secondaryCta = { text: "Book a Demo", href: "/demo" },
+  primaryCta = { text: "Get Started", href: { pathname: "#signup-form" } },
+  secondaryCta = { text: "Book a Demo", href: { pathname: "/demo" } },
   highlights = [
     "Reduce onboarding time by up to 80%",
     "Automatic FMCSA verification",

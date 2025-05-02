@@ -150,7 +150,7 @@ export default function BrokerDashboard() {
         
         <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
           <Link 
-            href={`/dashboard/brokers/${brokerId}/documents`} 
+            href={{pathname: `/dashboard/brokers/${brokerId}/documents`}}
             className="flex flex-col items-center text-center"
           >
             <FileText className="h-8 w-8 mb-2 text-primary" />
@@ -161,7 +161,7 @@ export default function BrokerDashboard() {
         
         <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
           <Link 
-            href={`/dashboard/brokers/${brokerId}/team`} 
+            href={{pathname: `/dashboard/brokers/${brokerId}/team`}}
             className="flex flex-col items-center text-center"
           >
             <Users className="h-8 w-8 mb-2 text-primary" />
@@ -172,7 +172,7 @@ export default function BrokerDashboard() {
         
         <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer">
           <Link 
-            href={`/dashboard/brokers/${brokerId}/reports`} 
+            href={{pathname: `/dashboard/brokers/${brokerId}/reports`}}
             className="flex flex-col items-center text-center"
           >
             <BarChart className="h-8 w-8 mb-2 text-primary" />

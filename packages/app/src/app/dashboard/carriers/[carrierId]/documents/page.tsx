@@ -440,6 +440,16 @@ interface DocumentCardProps {
 }
 
 function DocumentCard({ document, onDelete }: DocumentCardProps) {
+  // Format date helper function for use in the component
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    }).format(date);
+  };
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">

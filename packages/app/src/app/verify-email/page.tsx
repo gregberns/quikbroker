@@ -214,7 +214,7 @@ function VerifyEmailContent() {
               
               <div className="mt-6 pt-6 border-t border-border text-center">
                 <p className="text-sm text-muted-foreground">
-                  Having trouble? <Link href="/support" className="text-primary hover:underline font-medium">Contact support</Link>
+                  Having trouble? <Link href={{ pathname: "/support" }} className="text-primary hover:underline font-medium">Contact support</Link>
                 </p>
               </div>
             </div>

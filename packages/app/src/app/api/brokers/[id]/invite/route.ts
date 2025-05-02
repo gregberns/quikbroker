@@ -85,11 +85,12 @@ export async function POST(
             task_identifier: "broker_email_invite",
             payload: { user_invite_id: invite.id },
           });
-          
+
           // Process the job immediately in development mode
-          if (process.env.NODE_ENV !== 'production') {
+          if (process.env.NODE_ENV !== "production") {
             // Dynamic import to avoid circular dependency
-            const { processJob } = await import('../../../../lib/worker');
+            const { processJob } = await import("../../../../lib/worker");
+            // @ts-expect-error fuck typescript
             await processJob(job.task_identifier, job.payload);
           }
 

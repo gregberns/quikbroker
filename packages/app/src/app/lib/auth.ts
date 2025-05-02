@@ -63,8 +63,10 @@ export async function getAuthSession(): Promise<{ id: number; email: string; rol
  */
 export async function createSession(
   user: { id: number; email: string; role: string },
-  cookieStore: ReturnType<typeof cookies>
+  cookieStore: ReturnType<typeof cookies> | Promise<ReturnType<typeof cookies>>
 ) {
+  // Ensure we have a resolved cookie store
+  const resolvedCookieStore = cookieStore instanceof Promise ? await cookieStore : cookieStore;
   // Generate JWT token
   const token = generateToken({
     sub: user.id,
@@ -73,7 +75,7 @@ export async function createSession(
   });
 
   // Set the token as a cookie
-  cookieStore.set({
+  resolvedCookieStore.set({
     name: SESSION_COOKIE_NAME,
     value: token,
     httpOnly: true,

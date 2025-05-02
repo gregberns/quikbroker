@@ -114,7 +114,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                    <Link href={{pathname: "/forgot-password"}} className="text-xs text-primary hover:underline">
                       Forgot password?
                     </Link>
                   </div>
@@ -141,7 +141,7 @@ export default function LoginPage() {
               
               <div className="mt-6 text-center text-sm">
                 <span className="text-muted-foreground">Don&apos;t have an account? </span>
-                <Link href="/signup" className="text-primary hover:underline font-medium">
+                <Link href={{ pathname: "/signup" }} className="text-primary hover:underline font-medium">
                   Create account
                 </Link>
               </div>

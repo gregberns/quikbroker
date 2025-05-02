@@ -150,8 +150,8 @@ function HomePageContent() {
         <CtaSection 
           title="Ready to transform your carrier management?"
           description="Join the growing number of freight brokers who are enhancing their bottom line through streamlined operations and reduced risk with QuikBroker."
-          primaryAction={{ text: "Get Started", href: "#signup-form" }}
-          secondaryAction={{ text: "Schedule Demo", href: "/demo" }}
+          primaryAction={{ text: "Get Started", href: { pathname: "#signup-form" } }}
+          secondaryAction={{ text: "Schedule Demo", href: { pathname: "/demo" } }}
         />
         
         {/* Signup Form */}

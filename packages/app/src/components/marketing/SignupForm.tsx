@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface SignupFormProps {
   className?: string;
@@ -90,7 +91,7 @@ export function SignupForm({
             )}
           </Button>
           <p className="text-xs text-center text-muted-foreground">
-            By signing up, you agree to our <a href="/terms" className="underline hover:text-foreground">Terms of Service</a> and <a href="/privacy" className="underline hover:text-foreground">Privacy Policy</a>.
+            By signing up, you agree to our <Link href={{ pathname: "/terms" }} className="underline hover:text-foreground">Terms of Service</Link> and <Link href={{ pathname: "/privacy" }} className="underline hover:text-foreground">Privacy Policy</Link>.
           </p>
         </form>
       </CardContent>

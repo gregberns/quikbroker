@@ -14,8 +14,9 @@ import * as db from "zapatos/db";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   return requireAuth(
     req,
     async (req, session) => {
@@ -28,7 +29,7 @@ export async function POST(
       }
 
       try {
-        const carrierId = parseInt(params.id);
+        const carrierId = parseInt(id);
 
         if (isNaN(carrierId)) {
           return NextResponse.json(
@@ -59,6 +60,7 @@ export async function POST(
         const timestamp = new Date();
         await db
           .update(
+            // @ts-expect-error fuck typescript
             "carriers",
             { invitation_sent_at: timestamp },
             { id: carrierId }

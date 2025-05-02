@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 
 interface NavItem {
   title: string;
-  href: string;
+  href: {pathname: string};
   icon: React.ReactNode;
   adminOnly?: boolean;
   brokerOnly?: boolean;
@@ -30,42 +30,42 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     title: 'Dashboard',
-    href: '/dashboard',
+    href: {pathname: '/dashboard'},
     icon: <Home className="h-5 w-5" />,
   },
   {
     title: 'Brokers',
-    href: '/dashboard/admin/brokers',
+    href: {pathname: '/dashboard/admin/brokers'},
     icon: <Building2 className="h-5 w-5" />,
     adminOnly: true,
   },
   {
     title: 'Carriers',
-    href: '/dashboard/admin/carriers',
+    href: {pathname: '/dashboard/admin/carriers'},
     icon: <Truck className="h-5 w-5" />,
     adminOnly: true,
   },
   {
     title: 'Users',
-    href: '/dashboard/admin/users',
+    href: {pathname: '/dashboard/admin/users'},
     icon: <Users className="h-5 w-5" />,
     adminOnly: true,
   },
   {
     title: 'My Carriers',
-    href: '/dashboard/brokers',
+    href: {pathname: '/dashboard/brokers'},
     icon: <Truck className="h-5 w-5" />,
     brokerOnly: true,
   },
   {
     title: 'My Documents',
-    href: '/dashboard/carriers/documents',
+    href: {pathname: '/dashboard/carriers/documents'},
     icon: <Truck className="h-5 w-5" />,
     carrierOnly: true,
   },
   {
     title: 'Settings',
-    href: '/dashboard/settings',
+    href: {pathname: '/dashboard/settings'},
     icon: <Settings className="h-5 w-5" />,
   },
 ];
@@ -143,11 +143,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <nav className="flex-1 space-y-1">
               {filteredNavItems.map((item) => (
                 <Link
-                  key={item.href}
+                  key={item.href.pathname}
                   href={item.href}
                   className={cn(
                     "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
-                    pathname === item.href
+                    pathname === item.href.pathname
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
@@ -160,7 +160,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           <div className="flex-shrink-0 flex border-t border-border p-4">
             <Button variant="outline" className="w-full flex items-center justify-center" asChild>
-              <Link href="/logout">
+              <Link href={{ pathname: "/logout" }}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Log Out
               </Link>
@@ -186,18 +186,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
               <div className="flex-shrink-0 flex items-center px-4">
-                <Link href="/dashboard" className="font-bold text-xl text-primary">
+                <Link href={{pathname: "/dashboard"}} className="font-bold text-xl text-primary">
                   QuikBroker
                 </Link>
               </div>
               <nav className="mt-5 px-2 space-y-1">
                 {filteredNavItems.map((item) => (
                   <Link
-                    key={item.href}
+                    key={item.href.pathname}
                     href={item.href}
                     className={cn(
                       "group flex items-center px-2 py-2 text-base font-medium rounded-md",
-                      pathname === item.href
+                      pathname === item.href.pathname
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
@@ -211,7 +211,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div className="flex-shrink-0 flex border-t border-border p-4">
               <Button variant="outline" className="w-full flex items-center justify-center" asChild>
-                <Link href="/logout">
+                <Link href={{ pathname: "/logout" }}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Log Out
                 </Link>
@@ -239,7 +239,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex-1 flex items-center">
               <h1 className="text-xl font-semibold text-foreground hidden md:block">
                 {/* Get title from current pathname */}
-                {filteredNavItems.find(item => pathname.startsWith(item.href))?.title || 'Dashboard'}
+                {filteredNavItems.find(item => pathname.startsWith(item.href.pathname))?.title || 'Dashboard'}
               </h1>
             </div>
             <div className="ml-4 flex items-center md:ml-6">
@@ -282,7 +282,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     aria-labelledby="user-menu"
                   >
                     <Link
-                      href="/dashboard/profile"
+                      href={{pathname: "/dashboard/profile"}}
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}
@@ -290,7 +290,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       Your Profile
                     </Link>
                     <Link
-                      href="/dashboard/settings"
+                      href={{pathname: "/dashboard/settings"}}
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}
@@ -298,7 +298,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       Settings
                     </Link>
                     <Link
-                      href="/logout"
+                      href={{ pathname: "/logout" }}
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}

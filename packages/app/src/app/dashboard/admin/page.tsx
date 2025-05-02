@@ -141,7 +141,7 @@ export default function AdminHome() {
             Manage system users, reset passwords, and control access permissions.
           </p>
           <Button asChild className="w-full">
-            <Link href="/dashboard/admin/users">
+            <Link href={{ pathname: "/dashboard/admin/users" }}>
               <Users className="mr-2 h-4 w-4" />
               View All Users
             </Link>
@@ -155,7 +155,7 @@ export default function AdminHome() {
             Add new brokers to the system and manage existing broker relationships.
           </p>
           <Button asChild variant="secondary" className="w-full">
-            <Link href="/dashboard/admin/brokers">
+            <Link href={{ pathname: "/dashboard/admin/brokers" }}>
               <Building2 className="mr-2 h-4 w-4" />
               View All Brokers
             </Link>
@@ -169,7 +169,7 @@ export default function AdminHome() {
             Add new carriers to the system and manage existing transportation providers.
           </p>
           <Button asChild variant="outline" className="w-full">
-            <Link href="/dashboard/admin/carriers">
+            <Link href={{ pathname: "/dashboard/admin/carriers" }}>
               <Truck className="mr-2 h-4 w-4" />
               View All Carriers
             </Link>

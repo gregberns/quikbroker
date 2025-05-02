@@ -104,7 +104,7 @@ export default function CarrierDashboardPage() {
             <RefreshCcw className="mr-2 h-4 w-4" /> Refresh Data
           </Button>
           <Button asChild>
-            <Link href={`/dashboard/carriers/${carrier.id}`}>
+            <Link href={{ pathname: `/dashboard/carriers/${carrier.id}` }}>
               <Truck className="mr-2 h-4 w-4" /> My Profile
             </Link>
           </Button>
@@ -185,7 +185,7 @@ export default function CarrierDashboardPage() {
           
           <div className="flex justify-center mt-2">
             <Button asChild>
-              <Link href={`/dashboard/carriers/${carrier.id}/documents`}>
+              <Link href={{ pathname: `/dashboard/carriers/${carrier.id}/documents` }}>
                 Manage Documents
               </Link>
             </Button>
@@ -202,7 +202,7 @@ export default function CarrierDashboardPage() {
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Button asChild variant="outline" className="justify-start h-auto py-4 px-4">
-                  <Link href={`/dashboard/carriers/${carrier.id}/documents`} className="flex items-start">
+                  <Link href={{ pathname: `/dashboard/carriers/${carrier.id}/documents` }} className="flex items-start">
                     <div className="p-2 mr-3 rounded-full bg-blue-100">
                       <FileText className="h-5 w-5 text-blue-600" />
                     </div>
@@ -214,7 +214,7 @@ export default function CarrierDashboardPage() {
                 </Button>
                 
                 <Button asChild variant="outline" className="justify-start h-auto py-4 px-4">
-                  <Link href={`/dashboard/carriers/${carrier.id}`} className="flex items-start">
+                  <Link href={{ pathname: `/dashboard/carriers/${carrier.id}` }} className="flex items-start">
                     <div className="p-2 mr-3 rounded-full bg-violet-100">
                       <Truck className="h-5 w-5 text-violet-600" />
                     </div>
@@ -252,7 +252,7 @@ export default function CarrierDashboardPage() {
                           className={exp.days_remaining <= 15 ? "border-red-200 bg-white hover:bg-red-50" : "border-amber-200 bg-white hover:bg-amber-50"}
                           asChild
                         >
-                          <Link href={`/dashboard/carriers/${carrier.id}/documents`}>
+                          <Link href={{ pathname: `/dashboard/carriers/${carrier.id}/documents` }}>
                             Renew Now
                           </Link>
                         </Button>
@@ -397,7 +397,7 @@ export default function CarrierDashboardPage() {
                           className="mt-1 h-7 px-2 text-xs"
                           asChild
                         >
-                          <Link href={`/dashboard/carriers/${carrier.id}/documents`}>
+                          <Link href={{ pathname: `/dashboard/carriers/${carrier.id}/documents` }}>
                             Upload
                           </Link>
                         </Button>
@@ -409,7 +409,7 @@ export default function CarrierDashboardPage() {
             </CardContent>
             <CardFooter>
               <Button asChild>
-                <Link href={`/dashboard/carriers/${carrier.id}/documents`}>
+                <Link href={{ pathname: `/dashboard/carriers/${carrier.id}/documents` }}>
                   View All Documents
                 </Link>
               </Button>

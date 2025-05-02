@@ -1,5 +1,15 @@
 'use client';
 
+interface LogParams {
+  level: string;
+  type: string;
+  message: string;
+  metadata?: Record<string, unknown> | undefined;
+}
+
+// Define the proper function interface here
+// This will be implemented later in the file
+
 /**
  * Utility to set up global error handlers for browser-side errors
  * This captures errors that happen outside of React components
@@ -113,12 +123,7 @@ export const clientLogger = {
 /**
  * Helper function to log errors to the server
  */
-async function logToServer(logData: {
-  level: string;
-  type: string;
-  message: string;
-  metadata?: Record<string, unknown>;
-}): Promise<void> {
+async function logToServer(logData: LogParams): Promise<void> {
   try {
     await fetch('/api/log-error', {
       method: 'POST',

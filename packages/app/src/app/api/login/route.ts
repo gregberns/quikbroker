@@ -6,8 +6,8 @@ import { serverLogger } from "../../lib/serverLogger";
 
 export async function POST(req: NextRequest) {
   // Log all login attempts for access tracking
-  serverLogger.access(req, 0, { endpoint: 'login' });
-  
+  serverLogger.access(req, 0, { endpoint: "login" });
+
   try {
     const { email, password } = await req.json();
 
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Query the database for the user
     const user = await getUserByEmail(email);
-    
+
     // User not found - return the same error message to prevent user enumeration
     if (!user) {
       return NextResponse.json(
@@ -35,11 +35,15 @@ export async function POST(req: NextRequest) {
 
     if (!passwordMatch) {
       // Log failed login attempts (for security monitoring)
-      serverLogger.security('failed-login', `Failed login attempt for ${email}`, {
-        email,
-        ip: req.ip || req.headers.get('x-forwarded-for') || 'unknown',
-      });
-      
+      serverLogger.security(
+        "failed-login",
+        `Failed login attempt for ${email}`,
+        {
+          email,
+          ip: req.headers.get("x-forwarded-for") || "unknown",
+        }
+      );
+
       return NextResponse.json(
         { message: "Invalid email or password" },
         { status: 401 }
@@ -47,7 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Authentication successful - create JWT session
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
     const token = await createSession(
       {
         id: user.id,
@@ -58,10 +62,10 @@ export async function POST(req: NextRequest) {
     );
 
     // Log successful login
-    serverLogger.info('login', `Successful login for ${email}`, {
+    serverLogger.info("login", `Successful login for ${email}`, {
       userId: user.id,
       role: user.role,
-      ip: req.ip || req.headers.get('x-forwarded-for') || 'unknown',
+      ip: req.headers.get("x-forwarded-for") || "unknown",
     });
 
     // Return success response with user info and token (for debugging and client-side storage if needed)
@@ -73,14 +77,14 @@ export async function POST(req: NextRequest) {
         role: user.role,
       },
       token, // Include token in response for client visibility
-      authMethod: 'jwt-cookie' // Indicate the authentication method
+      authMethod: "jwt-cookie", // Indicate the authentication method
     });
   } catch (error) {
     console.error("Login error:", error);
-    
+
     // Log error using server logger
     serverLogger.apiError(req, error);
-    
+
     return NextResponse.json(
       { message: "An error occurred during login" },
       { status: 500 }

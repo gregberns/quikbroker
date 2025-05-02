@@ -7,12 +7,12 @@ import { getClient } from "@/db/client";
 
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { params } = context;
+  const { id } = await params;
   return requireAuth(req, async (req, session) => {
     try {
-      const brokerId = parseInt(params.id);
+      const brokerId = parseInt(id);
 
       if (isNaN(brokerId)) {
         return NextResponse.json(
@@ -43,7 +43,7 @@ export async function GET(
             : "Unknown error fetching broker",
         stack: error instanceof Error ? error.stack : undefined,
         url: req.url,
-        brokerId: params.id,
+        brokerId: id,
         userId: session?.id,
         userRole: session?.role,
         timestamp: new Date().toISOString(),
@@ -59,9 +59,9 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { params } = context;
+  const { id } = await params;
   return requireAuth(
     req,
     async (req, session) => {
@@ -74,7 +74,7 @@ export async function PUT(
       }
 
       try {
-        const brokerId = parseInt(params.id);
+        const brokerId = parseInt(id);
 
         if (isNaN(brokerId)) {
           return NextResponse.json(
@@ -151,7 +151,7 @@ export async function PUT(
               : "Unknown error updating broker",
           stack: error instanceof Error ? error.stack : undefined,
           url: req.url,
-          brokerId: params.id,
+          brokerId: id,
           userId: session?.id,
           userRole: session?.role,
           timestamp: new Date().toISOString(),

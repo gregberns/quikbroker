@@ -2,56 +2,11 @@
 ## Bugs
 
 
+## Best Practices
+
+[] Build out best practices - Components in `src/components` should not have hard coded paths/urls/hrefs/ect. This will allow them to be reused more reliably in the future. Also if there is hard coded text that is specific to this project, application, business, the text should be passed in via convention. First decide on a proper convention, then document it so we dont forget, then update the components. 
+
 ## Deployment
-
-[] HIGH PRIORITY - Running `docker compose build app` to build the web application is now failing. Please look through the docker-compose in the root and `packages/app/Dockerfile` to see what might be going on. It was working before, so I don't think it should require a significant change. The error is below:
-
-```
- => ERROR [app builder 6/6] RUN cd packages/app && yarn build                                                                      5.3s
-------
- > [app builder 6/6] RUN cd packages/app && yarn build:
-0.207 yarn run v1.22.22
-0.228 $ next build
-0.585    ▲ Next.js 15.3.0
-0.585    - Environments: .env.production, .env
-0.585    - Experiments (use with caution):
-0.585      ✓ typedRoutes
-0.585
-0.657    Creating an optimized production build ...
-5.233 Failed to compile.
-5.233
-5.233 ./src/app/dashboard/admin/brokers/page.tsx
-5.233 Module not found: Can't resolve '@/components/ui/button'
-5.233
-5.233 https://nextjs.org/docs/messages/module-not-found
-5.233
-5.233 ./src/app/dashboard/admin/brokers/page.tsx
-5.233 Module not found: Can't resolve '@/components/ui/input'
-5.233
-5.233 https://nextjs.org/docs/messages/module-not-found
-5.233
-5.233 ./src/app/dashboard/admin/brokers/page.tsx
-5.233 Module not found: Can't resolve '@/components/ui/label'
-5.233
-5.233 https://nextjs.org/docs/messages/module-not-found
-5.233
-5.233 ./src/app/dashboard/admin/brokers/page.tsx
-5.233 Module not found: Can't resolve '@/components/ui/card'
-5.233
-5.233 https://nextjs.org/docs/messages/module-not-found
-5.233
-5.233 ./src/app/dashboard/admin/brokers/page.tsx
-5.233 Module not found: Can't resolve '@/components/ui/dashboard/data-table'
-5.233
-5.233 https://nextjs.org/docs/messages/module-not-found
-5.233
-5.235
-5.235 > Build failed because of webpack errors
-5.250 error Command failed with exit code 1.
-5.250 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
-------
-failed to solve: process "/bin/sh -c cd packages/app && yarn build" did not complete successfully: exit code: 1
-```
 
 
 ## Broker Dashboard
@@ -88,25 +43,9 @@ Also, the phone number field is not using a proper phone number mask - so you ca
 
 ### React
 
-[x] React Routing and Paths - In `src/app/login/page.tsx`, the page changes are occuring through direct dom access `window.location.href = '/dashboard';`. I'm not positive, but I don't think this is a React best practice. If its not, lets figure out what the best practice is, then document it so future runs will conform to the best practices. Then fix any places that pattern is being followed. Also, referring to the route directly via string '/dashboard' I don't believe is a sustainable way of managing routing as this app grows larger. Lets build some best practes around route management, document them, them update any locations using improper patterns.
-
-[x] Code cleanup - Remove legacy session cookie handling and standardize on JWT-based auth
 
 ### Logging
 
-[x] We had initially added logging in to track what was going on - but we had the logging go to the database, which isn't the right place. Lets build out a conventional logging system. At some point, I'd like all errors both API and NextJs handled errors to flow into a central location, and allow an AI Agent to triage the errors, identify fixes, and create pull requests with the fix.
-
-```
-Error while logging client error: error: relation "app_private.error_logs" does not exist
-    at async POST (src/app/api/log-error/route.ts:19:6)
-  17 |     try {
-  18 |       // Insert the error log
-> 19 |       await client.query(
-     |      ^
-  20 |         `INSERT INTO app_private.error_logs
-  21 |          (error_type, message, stack, component_stack, url, user_agent, client_timestamp, metadata)
-  22 |          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, {
-```
 
 ### Database Migration system
 

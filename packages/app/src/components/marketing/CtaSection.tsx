@@ -7,11 +7,11 @@ interface CtaSectionProps {
   description: string;
   primaryAction: {
     text: string;
-    href: string;
+    href: { pathname: string };
   };
   secondaryAction?: {
     text: string;
-    href: string;
+    href: { pathname: string };
   };
   className?: string;
 }

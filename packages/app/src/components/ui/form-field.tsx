@@ -8,7 +8,7 @@ interface FormFieldProps {
   id: string;
   label?: string;
   children: React.ReactNode;
-  error?: string;
+  error?: string | undefined;
   className?: string;
 }
 
