@@ -6,7 +6,7 @@ import { serverLogger } from '../../../lib/serverLogger';
 export async function GET(req: Request) {
   try {
     // Log session check for monitoring
-    serverLogger.access(req as any, 200, { endpoint: 'session-check' });
+    serverLogger.access(req as unknown as { ip?: string; headers: Headers }, 200, { endpoint: 'session-check' });
     
     const session = await getAuthSession();
     const cookieStore = await cookies();

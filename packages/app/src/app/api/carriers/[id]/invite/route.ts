@@ -6,10 +6,11 @@ import * as crypto from "crypto";
 import { sql } from "@/db/client";
 import * as db from "zapatos/db";
 
+// NOTE: This function is kept for future use when implementing actual carrier invite tokens
 // Helper function to generate a secure random token
-function generateSecureToken(length = 32) {
-  return crypto.randomBytes(length).toString("hex");
-}
+// function generateSecureToken(length = 32) {
+//   return crypto.randomBytes(length).toString("hex");
+// }
 
 export async function POST(
   req: NextRequest,

@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { StatsCard } from '@/components/ui/dashboard/stats-card';
 
 export default function AdminHome() {
-  const [user, setUser] = useState<{ id: number; email: string; role: string } | null>(null);
+  // State for user data when needed
+  const [, setUser] = useState<{ id: number; email: string; role: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
@@ -216,7 +217,7 @@ export default function AdminHome() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="contactName">Contact's Name</Label>
+              <Label htmlFor="contactName">Contact&apos;s Name</Label>
               <Input
                 id="contactName"
                 value={contactName}

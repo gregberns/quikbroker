@@ -77,7 +77,14 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  interface UserData {
+    id: number;
+    email: string;
+    role: string;
+    name?: string;
+  }
+  
+  const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
 

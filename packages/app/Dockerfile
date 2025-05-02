@@ -31,11 +31,14 @@ WORKDIR /app
 # Copy package files
 COPY package.json yarn.lock ./
 COPY packages/app/package.json ./packages/app/package.json
+COPY packages/app/tsconfig.json ./packages/app/tsconfig.json
+COPY packages/app/next.config.ts ./packages/app/next.config.ts
 
 # Set up workspace and install dependencies
-# RUN yarn install --production=false
-RUN yarn install --production --pure-lockfile --non-interactive --cache-folder ./ycache; rm -rf ./ycache
+# First install with development dependencies to allow for proper building
+RUN yarn install --non-interactive --cache-folder ./ycache; rm -rf ./ycache
 
+# Copy the entire app source code
 COPY packages/app/ ./packages/app/
 
 # Build the app

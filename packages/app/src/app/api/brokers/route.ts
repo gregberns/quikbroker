@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
           // 3. Create the broker record and link it to the user
           const ownerUserId = newUser.id;
-          const broker = await createBroker(
+          await createBroker(
             { name, email, contactName, brokerage_name },
             ownerUserId
           );

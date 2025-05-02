@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { DataTable } from '@/components/ui/dashboard/data-table';
-import { cn } from '@/lib/utils';
+// import { cn } from '@/lib/utils';
 
 interface Broker {
   id: number;
@@ -81,7 +81,7 @@ export default function AdminBrokersPage() {
         throw new Error(errorData.message || 'Failed to add broker');
       }
 
-      const data = await response.json();
+      await response.json(); // Get data for confirmation
 
       // Close the modal and reset the form
       setShowAddBrokerModal(false);

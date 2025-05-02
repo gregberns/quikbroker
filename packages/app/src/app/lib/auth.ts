@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
-import { generateToken, verifyToken, TokenPayload } from "./jwt";
+import { generateToken, verifyToken } from "./jwt";
 
 // Centralized password handling functions
 const SALT_ROUNDS = 10; // Keep this consistent for all password hashing
