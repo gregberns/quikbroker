@@ -36,13 +36,13 @@ COPY packages/app/next.config.ts ./packages/app/next.config.ts
 
 # Set up workspace and install dependencies
 # First install with development dependencies to allow for proper building
-RUN yarn install --non-interactive --cache-folder ./ycache; rm -rf ./ycache
+RUN yarn install --production --pure-lockfile --non-interactive --cache-folder ./ycache; rm -rf ./ycache
 
 # Copy the entire app source code
 COPY packages/app/ ./packages/app/
 
 # Build the app
-RUN cd packages/app && yarn build
+RUN cd packages/app && yarn && yarn build
 
 # Runner stage
 FROM base AS runner

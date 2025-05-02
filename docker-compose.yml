@@ -2,12 +2,6 @@ services:
   db:
     image: postgres:16
     restart: always
-    # environment:
-    #   - DATABASE_USERNAME=quikbroker_owner
-    #   - DATABASE_PASSWORD=1234
-    #   - DATABASE_HOST=localhost
-    #   - DATABASE_NAME=quikbroker
-    #   - DATABASE_PORT=6000
     env_file:
       - .env
     ports:
@@ -16,7 +10,13 @@ services:
       - ./scripts/new-db:/docker-entrypoint-initdb.d/
       - ./db_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ 'CMD', '/usr/bin/pg_isready', '--dbname=quikbroker', '--username=quikbroker_owner' ]
+      test:
+        [
+          "CMD",
+          "/usr/bin/pg_isready",
+          "--dbname=quikbroker",
+          "--username=quikbroker_owner",
+        ]
       interval: 5s
       timeout: 10s
       retries: 120
@@ -29,10 +29,6 @@ services:
     ports:
       # - "3003:3000"
       - "3003:8080"
-    # environment:
-    #   - NODE_ENV=development
-    #   - PORT=8080
-    #   - POSTGRES_CONNECTION=postgres://quikbroker_owner:1234@localhost:6000/quikbroker
     env_file:
       - .env
     depends_on:
@@ -54,10 +50,10 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    entrypoint: [ '' ]
+    entrypoint: [""]
     # Inspired by: https://docs.docker.com/compose/startup-order/
     # command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'yarn', 'migrate' ]
     # command: [ '/scripts/wait-for-port.sh', 'db:5432', '--timeout=0', '--', 'docker-entrypoint.sh' ]
-    command: [ 'docker-entrypoint.sh' ]
+    command: ["docker-entrypoint.sh"]
     # networks:
     #   - default
