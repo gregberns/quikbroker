@@ -4,63 +4,60 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import { Loader2, Shield, Building2, Truck, AlertCircle } from 'lucide-react';
+import { useAuth } from '../lib/authClient';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string>('Checking authentication...');
+  
+  // Use our auth hook for centralized auth management
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    // Only run this effect if auth status is determined (not loading)
+    if (isLoading) {
+      return;
+    }
+    
+    if (!isAuthenticated) {
+      setError('Authentication required. Redirecting to login...');
+      setTimeout(() => {
+        router.push('/login' as Route);
+      }, 1000);
+      return;
+    }
+    
+    // User is authenticated, redirect based on role
+    if (user) {
       try {
-        setStatus('Checking authentication...');
-        
-        const response = await fetch('/api/me');
-
-        if (!response.ok) {
-          throw new Error('Not authenticated');
-        }
-
-        const data = await response.json();
-
-        // Redirect based on user role
-        if (data.user) {
-          switch (data.user.role) {
-            case 'admin':
-              setStatus('Admin authenticated, redirecting to admin dashboard...');
-              router.push('/dashboard/admin' as Route);
-              break;
-            case 'broker':
-              setStatus('Broker authenticated, redirecting to broker dashboard...');
-              // If the user is a broker, we need to find which broker they're associated with
-              // For now, we're assuming the broker ID is the same as the user ID
-              router.push(`/dashboard/brokers/${data.user.id}` as Route);
-              break;
-            case 'carrier':
-              setStatus('Carrier authenticated, redirecting to carrier dashboard...');
-              router.push('/dashboard/carriers' as Route);
-              break;
-            default:
-              setError('Unknown user role. Please contact support.');
-              setTimeout(() => {
-                router.push('/login' as Route);
-              }, 3000);
-          }
-        } else {
-          throw new Error('User data not found');
+        switch (user.role) {
+          case 'admin':
+            setStatus('Admin authenticated, redirecting to admin dashboard...');
+            router.push('/dashboard/admin' as Route);
+            break;
+          case 'broker':
+            setStatus('Broker authenticated, redirecting to broker dashboard...');
+            // If the user is a broker, we need to find which broker they're associated with
+            // For now, we're assuming the broker ID is the same as the user ID
+            router.push(`/dashboard/brokers/${user.id}` as Route);
+            break;
+          case 'carrier':
+            setStatus('Carrier authenticated, redirecting to carrier dashboard...');
+            router.push('/dashboard/carriers' as Route);
+            break;
+          default:
+            setError('Unknown user role. Please contact support.');
+            setTimeout(() => {
+              router.push('/login' as Route);
+            }, 2000);
         }
       } catch (error) {
-        console.error('Authentication error:', error);
-        setError('Authentication failed. Redirecting to login...');
-        
-        setTimeout(() => {
-          router.push('/login' as Route);
-        }, 2000);
+        console.error('Redirection error:', error);
+        setError('Error during redirection. Please try again.');
       }
-    };
-
-    fetchUserData();
-  }, [router]);
+    }
+  }, [isAuthenticated, isLoading, user, router]);
 
   return (
     <div className="flex justify-center items-center h-screen">

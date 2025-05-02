@@ -4,4 +4,8 @@ db_data/
 db_data_shadow/
 .env
 
+# Log files
+packages/app/logs/
+logs/
+
 **/.claude/settings.local.json

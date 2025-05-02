@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyPassword, createSession } from "../../lib/auth";
 import { getUserByEmail } from "@/db/queries/users";
-import { logErrorToServer } from "../../lib/errorHandling";
+import { serverLogger } from "../../lib/serverLogger";
 
 export async function POST(req: NextRequest) {
+  // Log all login attempts for access tracking
+  serverLogger.access(req, 0, { endpoint: 'login' });
+  
   try {
     const { email, password } = await req.json();
 
@@ -32,11 +35,9 @@ export async function POST(req: NextRequest) {
 
     if (!passwordMatch) {
       // Log failed login attempts (for security monitoring)
-      logErrorToServer({
-        type: "security-warning",
-        message: "Failed login attempt",
-        email: email,
-        timestamp: new Date().toISOString(),
+      serverLogger.security('failed-login', `Failed login attempt for ${email}`, {
+        email,
+        ip: req.ip || req.headers.get('x-forwarded-for') || 'unknown',
       });
       
       return NextResponse.json(
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     // Authentication successful - create JWT session
     const cookieStore = await cookies();
-    await createSession(
+    const token = await createSession(
       {
         id: user.id,
         email: user.email,
@@ -56,7 +57,14 @@ export async function POST(req: NextRequest) {
       cookieStore
     );
 
-    // Return success response with user info
+    // Log successful login
+    serverLogger.info('login', `Successful login for ${email}`, {
+      userId: user.id,
+      role: user.role,
+      ip: req.ip || req.headers.get('x-forwarded-for') || 'unknown',
+    });
+
+    // Return success response with user info and token (for debugging and client-side storage if needed)
     return NextResponse.json({
       message: "Login successful",
       user: {
@@ -64,18 +72,14 @@ export async function POST(req: NextRequest) {
         email: user.email,
         role: user.role,
       },
+      token, // Include token in response for client visibility
+      authMethod: 'jwt-cookie' // Indicate the authentication method
     });
   } catch (error) {
     console.error("Login error:", error);
     
-    // Log error
-    logErrorToServer({
-      type: "api-error",
-      message: error instanceof Error ? error.message : "Unknown login error",
-      stack: error instanceof Error ? error.stack : undefined,
-      url: req.url,
-      timestamp: new Date().toISOString(),
-    });
+    // Log error using server logger
+    serverLogger.apiError(req, error);
     
     return NextResponse.json(
       { message: "An error occurred during login" },

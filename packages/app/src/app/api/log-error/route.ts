@@ -1,54 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
-
-// Create a connection pool to the database
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_CONNECTION,
-});
+import { serverLogger } from "../../lib/serverLogger";
 
 export async function POST(req: NextRequest) {
   try {
     // Parse the error data from the request
-    const errorData = await req.json();
+    const logData = await req.json();
 
-    // Get a client from the pool
-    const client = await pool.connect();
+    // Determine log level and type
+    const level = logData.level || 'ERROR';
+    const type = logData.type || 'client-error';
+    const message = logData.message || 'No message provided';
 
-    try {
-      // Insert the error log
-      await client.query(
-        `INSERT INTO app_private.error_logs 
-         (error_type, message, stack, component_stack, url, user_agent, client_timestamp, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [
-          errorData.type || 'unknown',
-          errorData.message || 'No message provided',
-          errorData.stack || null,
-          errorData.componentStack || null,
-          errorData.url || null,
-          req.headers.get('user-agent') || null,
-          errorData.timestamp ? new Date(errorData.timestamp) : null,
-          JSON.stringify({
-            ...errorData,
-            // Remove fields we're already storing in dedicated columns
-            type: undefined,
-            message: undefined,
-            stack: undefined,
-            componentStack: undefined,
-            url: undefined,
-            timestamp: undefined
-          })
-        ]
-      );
-
-      console.error(`Error logged [${errorData.type}]: ${errorData.message}`);
-
-      return NextResponse.json({ success: true });
-    } finally {
-      client.release();
+    // Log the error using the appropriate method based on level
+    switch (level) {
+      case 'ERROR':
+        serverLogger.error(type, message, logData.metadata);
+        break;
+      case 'WARN':
+        serverLogger.warn(type, message, logData.metadata);
+        break;
+      case 'INFO':
+        serverLogger.info(type, message, logData.metadata);
+        break;
+      case 'DEBUG':
+        serverLogger.debug(type, message, logData.metadata);
+        break;
+      default:
+        serverLogger.error(type, message, logData.metadata);
     }
+
+    // Also log API access
+    serverLogger.access(req, 200, { logType: 'client-log' });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error while logging client error:', error);
+    serverLogger.apiError(req, error);
 
     return NextResponse.json(
       { success: false, message: 'Failed to log error' },

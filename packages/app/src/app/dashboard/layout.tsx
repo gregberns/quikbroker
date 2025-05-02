@@ -85,13 +85,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/me');
+        // Add a timestamp to prevent caching issues
+        const response = await fetch('/api/me?t=' + Date.now(), {
+          credentials: 'same-origin',
+          headers: {
+            'Cache-Control': 'no-cache',
+          }
+        });
 
         if (!response.ok) {
+          console.error('API response not OK:', response.status, response.statusText);
           throw new Error('Not authenticated');
         }
 
         const data = await response.json();
+        console.log('User data loaded:', data);
         setUser(data.user);
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -145,9 +153,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           <div className="flex-shrink-0 flex border-t border-border p-4">
             <Button variant="outline" className="w-full flex items-center justify-center" asChild>
-              <Link href="/api/logout">
+              <Link href="/logout">
                 <LogOut className="mr-2 h-4 w-4" />
-                Log out
+                Log Out
               </Link>
             </Button>
           </div>
@@ -196,9 +204,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             <div className="flex-shrink-0 flex border-t border-border p-4">
               <Button variant="outline" className="w-full flex items-center justify-center" asChild>
-                <Link href="/api/logout">
+                <Link href="/logout">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Log out
+                  Log Out
                 </Link>
               </Button>
             </div>
@@ -283,12 +291,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       Settings
                     </Link>
                     <Link
-                      href="/api/logout"
+                      href="/logout"
                       className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
                       role="menuitem"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      Sign out
+                      Log Out
                     </Link>
                   </div>
                 )}

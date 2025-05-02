@@ -8,63 +8,68 @@ import { Footer } from '@/components/marketing/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '../lib/authClient';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const router = useRouter();
+  
+  // Use our auth hook for centralized auth management
+  const { isAuthenticated, isLoading, login } = useAuth();
 
-  // Check if user is already authenticated when component mounts
+  // Redirect if already authenticated
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const response = await fetch('/api/auth/session', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+    if (isAuthenticated && !isLoading) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.authenticated) {
-            // User is already logged in, redirect to dashboard
-            router.push('/dashboard');
-          }
-        }
-      } catch (err) {
-        console.error('Error checking auth status:', err);
-      }
-    };
-
-    checkAuthStatus();
-  }, [router]);
+  // Function to get URL parameters
+  const getUrlParameter = (name: string) => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    return null;
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null); // Clear previous errors
+    setIsLoggingIn(true); // Start loading state
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        // Redirect to dashboard on successful login
-        router.push('/dashboard');
+      // Use the login function from our auth hook
+      const response = await login({ email, password });
+      
+      console.log('Login attempt result:', response);
+      
+      if (response.success) {
+        // Add a small delay to let the cookie be set properly before redirecting
+        setTimeout(() => {
+          console.log('Redirecting after successful login...');
+          
+          // Check if we were redirected from another page and should return there
+          const fromPath = getUrlParameter('from');
+          const redirectPath = fromPath || '/dashboard';
+          
+          console.log(`Redirecting to: ${redirectPath}`);
+          
+          // Force a full page reload to ensure the cookie is used in the next request
+          window.location.href = redirectPath;
+        }, 500);
       } else {
-        const data = await response.json();
-        setError(data.message || 'Invalid email or password');
+        setError(response.error || 'Invalid email or password');
+        setIsLoggingIn(false);
       }
     } catch (err) {
       setError('An error occurred during login. Please try again.');
       console.error('Login error:', err);
+      setIsLoggingIn(false);
     }
   };
 
@@ -122,8 +127,15 @@ export default function LoginPage() {
                   />
                 </div>
                 
-                <Button type="submit" className="w-full">
-                  Log in
+                <Button type="submit" className="w-full" disabled={isLoggingIn || isLoading}>
+                  {isLoggingIn || isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Logging in...
+                    </>
+                  ) : (
+                    'Log in'
+                  )}
                 </Button>
               </form>
               

@@ -11,15 +11,11 @@ export function setupGlobalErrorHandlers() {
   const handleError = (event: ErrorEvent) => {
     event.preventDefault(); // Prevent default browser error handling
 
-    logErrorToServer({
-      type: 'uncaught-error',
-      message: event.message || 'Unknown error',
+    clientLogger.error('uncaught-error', event.message || 'Unknown error', {
       stack: event.error?.stack,
       filename: event.filename,
       lineno: event.lineno,
       colno: event.colno,
-      url: window.location.href,
-      timestamp: new Date().toISOString(),
     });
 
     console.error('Uncaught error:', event.error);
@@ -42,13 +38,7 @@ export function setupGlobalErrorHandlers() {
       message = JSON.stringify(reason);
     }
 
-    logErrorToServer({
-      type: 'unhandled-rejection',
-      message,
-      stack,
-      url: window.location.href,
-      timestamp: new Date().toISOString(),
-    });
+    clientLogger.error('unhandled-rejection', message, { stack });
 
     console.error('Unhandled promise rejection:', reason);
   };
@@ -64,33 +54,107 @@ export function setupGlobalErrorHandlers() {
   };
 }
 
-// Helper function to log errors to the server
-export async function logErrorToServer(errorData: Record<string, unknown>): Promise<void> {
+/**
+ * Client-side logger - sends logs to the server
+ */
+export const clientLogger = {
+  /**
+   * Log an error
+   */
+  error(type: string, message: string, metadata?: Record<string, any>): void {
+    logToServer({
+      level: 'ERROR',
+      type,
+      message,
+      metadata,
+    });
+  },
+
+  /**
+   * Log a warning
+   */
+  warn(type: string, message: string, metadata?: Record<string, any>): void {
+    logToServer({
+      level: 'WARN',
+      type,
+      message,
+      metadata,
+    });
+  },
+
+  /**
+   * Log an informational message
+   */
+  info(type: string, message: string, metadata?: Record<string, any>): void {
+    logToServer({
+      level: 'INFO',
+      type,
+      message,
+      metadata,
+    });
+  },
+
+  /**
+   * Log a debug message
+   */
+  debug(type: string, message: string, metadata?: Record<string, any>): void {
+    // Only log debug messages in development
+    if (process.env.NODE_ENV !== 'production') {
+      logToServer({
+        level: 'DEBUG',
+        type,
+        message,
+        metadata,
+      });
+    }
+  },
+};
+
+/**
+ * Helper function to log errors to the server
+ */
+async function logToServer(logData: {
+  level: string;
+  type: string;
+  message: string;
+  metadata?: Record<string, any>;
+}): Promise<void> {
   try {
     await fetch('/api/log-error', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(errorData),
+      body: JSON.stringify({
+        ...logData,
+        url: window.location.href,
+        userAgent: window.navigator.userAgent,
+        timestamp: new Date().toISOString(),
+      }),
     });
   } catch (err) {
     // If logging fails, we don't want to cause additional errors
-    console.error('Failed to log error to server:', err);
+    console.error('Failed to log to server:', err);
   }
+}
+
+// For backward compatibility and ease of use in client components
+export function logErrorToServer(errorData: Record<string, unknown>): Promise<void> {
+  return logToServer({
+    level: 'ERROR',
+    type: errorData.type as string || 'client-error',
+    message: errorData.message as string || 'Unknown error',
+    metadata: errorData,
+  });
 }
 
 // Export a standalone function for manual error logging
 export function logError(error: Error | string, context: Record<string, unknown> = {}): void {
   const errorObj = error instanceof Error ? error : new Error(error);
 
-  logErrorToServer({
-    type: 'manual-log',
-    message: errorObj.message,
+  clientLogger.error('manual-log', errorObj.message, {
+    ...context,
     stack: errorObj.stack,
-    context,
-    url: typeof window !== 'undefined' ? window.location.href : undefined,
-    timestamp: new Date().toISOString(),
   });
 }
 
