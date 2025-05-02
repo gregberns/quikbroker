@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 interface StatProps {
   value: string;
   label: string;
-  description?: string;
+  description?: string | undefined;
 }
 
 function Stat({ value, label, description }: StatProps) {
