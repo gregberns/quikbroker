@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 // Define which routes should be protected
 const protectedRoutes = ['/dashboard', '/admin'];

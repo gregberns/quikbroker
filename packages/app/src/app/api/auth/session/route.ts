@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import { getAuthSession } from '../../../lib/auth';
 import { serverLogger } from '../../../lib/serverLogger';
 

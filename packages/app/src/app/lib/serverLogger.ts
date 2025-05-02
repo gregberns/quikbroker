@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { NextRequest } from 'next/server';
+import { NextRequest } from "next/server";
 
 // Configure log directory - in a real app, use environment variables
 const LOG_DIR = process.env.LOG_DIR || path.join(process.cwd(), 'logs');
