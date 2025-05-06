@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "./fallback-styles.css"; // Load basic styles first to prevent FOUC
 import "./globals.css";
 import ClientErrorBoundary from "./components/ClientErrorBoundary";
-import ThemeProvider from "./theme/ThemeProvider";
+import { ThemeProvider } from "../../../ui-components/src/theme/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientErrorBoundary>
-          <ThemeProvider>
+          <ThemeProvider 
+            defaultTheme="light" 
+            attribute="data-theme" 
+            enableSystem={true}
+            themes={['light', 'dark']}
+          >
             {children}
           </ThemeProvider>
         </ClientErrorBoundary>

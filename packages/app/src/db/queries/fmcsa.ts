@@ -64,9 +64,11 @@ export interface FMCSACarrier {
 
 // Query functions
 export async function getFMCSACarrierByDotNumber(dotNumber: string): Promise<FMCSACarrier | null> {
+  // Cast dot_number to a string to ensure proper comparison
+  // This prevents PostgreSQL from treating numeric values as column names
   const result = await db.sql<FMCSACarrier[]>`
     SELECT * FROM app.fmcsa_carrier_view 
-    WHERE dot_number = ${dotNumber}
+    WHERE dot_number = ${dotNumber}::text
     LIMIT 1
   `.run(sql);
   

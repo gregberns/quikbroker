@@ -4,17 +4,16 @@ import { Suspense } from 'react';
 import { ClipboardCheck, Gauge, Shield, BarChart4, Truck, FileText } from 'lucide-react';
 
 // Marketing Components from shared UI components package
-import { 
-  Header, 
-  Footer, 
-  HeroSection, 
-  FeatureList, 
-  SignupForm, 
-  StatsSection, 
-  TestimonialSection, 
-  TrustSection, 
-  CtaSection 
-} from '@quikbroker/ui-components';
+// Direct imports from ui-components source
+import { Header } from '../../../ui-components/src/components/marketing/Header';
+import { Footer } from '../../../ui-components/src/components/marketing/Footer';
+import { HeroSection } from '../../../ui-components/src/components/marketing/HeroSection';
+import { FeatureList } from '../../../ui-components/src/components/marketing/FeatureCard';
+import { SignupForm } from '../../../ui-components/src/components/marketing/SignupForm';
+import { StatsSection } from '../../../ui-components/src/components/marketing/StatsSection';
+import { TestimonialSection } from '../../../ui-components/src/components/marketing/Testimonial';
+import { TrustSection } from '../../../ui-components/src/components/marketing/TrustSection';
+import { CtaSection } from '../../../ui-components/src/components/marketing/CtaSection';
 
 // Landing page with suspense boundary for search params
 function HomePageContent() {
