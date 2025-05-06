@@ -3,16 +3,18 @@
 import { Suspense } from 'react';
 import { ClipboardCheck, Gauge, Shield, BarChart4, Truck, FileText } from 'lucide-react';
 
-// Marketing Components
-import { Header } from '@/components/marketing/Header';
-import { Footer } from '@/components/marketing/Footer';
-import { HeroSection } from '@/components/marketing/HeroSection';
-import { FeatureList } from '@/components/marketing/FeatureCard';
-import { SignupForm } from '@/components/marketing/SignupForm';
-import { StatsSection } from '@/components/marketing/StatsSection';
-import { TestimonialSection } from '@/components/marketing/Testimonial';
-import { TrustSection } from '@/components/marketing/TrustSection';
-import { CtaSection } from '@/components/marketing/CtaSection';
+// Marketing Components from shared UI components package
+import { 
+  Header, 
+  Footer, 
+  HeroSection, 
+  FeatureList, 
+  SignupForm, 
+  StatsSection, 
+  TestimonialSection, 
+  TrustSection, 
+  CtaSection 
+} from '@quikbroker/ui-components';
 
 // Landing page with suspense boundary for search params
 function HomePageContent() {

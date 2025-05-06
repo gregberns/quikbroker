@@ -50,3 +50,19 @@ services:
     environment:
       - SQITCH_TARGET=db:pg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     command: ["deploy"]
+
+  jobs:
+    build:
+      context: ./packages/job-system
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./packages/job-system/files
+        target: /worker/files
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    # command: ["echo $PWD"]
+    # command: ["/app/scripts/fmcsa-file-upload.sh"]

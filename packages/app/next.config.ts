@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  transpilePackages: ["@quikbroker/ui-components"],
   webpack: (config, { isServer }) => {
     // for path in tsconfig.js: "@/*": ["./src/*"]
     config.resolve.alias["@"] = path.join(__dirname, "src");

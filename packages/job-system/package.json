@@ -1,0 +1,11 @@
+{
+  "name": "@quikbroker/job-system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {},
+  "dependencies": {
+    "graphile-worker": "^0.16.6",
+    "pg": "^8.15.6",
+    "pg-copy-streams": "^6.0.6"
+  }
+}
