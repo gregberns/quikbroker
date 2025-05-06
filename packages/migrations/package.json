@@ -5,7 +5,7 @@
   "scripts": {
     "test-migrations": "./scripts/test-migrations.sh",
     "deploy-script": "BASH_ENV=./.env ./scripts/deploy.sh",
-    "deploy": "sqitch deploy",
+    "deploy": "./sqitch deploy",
     "revert": "sqitch revert",
     "verify": "sqitch verify",
     "deploy:prod": "sqitch deploy db:pg://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME",

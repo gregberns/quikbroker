@@ -1,0 +1,6 @@
+{
+  "main": "../../dist/components/theme/createTheme.js",
+  "module": "../../dist/components/theme/createTheme.mjs",
+  "types": "../../dist/components/theme/createTheme.d.ts",
+  "sideEffects": false
+}

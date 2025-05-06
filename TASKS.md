@@ -6,6 +6,7 @@
 
 Email: admin@quikbroker.com
 Password: ohbixmmmoicomrgd1400 (see ADMIN_CREDENTIALS.md for details)
+TomsTheSalesGuy0987
 
 ## Admin Login
 

@@ -1,12 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // Set to 'export' to generate static files
   // Only enable image optimization for production
   images: {
     unoptimized: process.env.NODE_ENV !== 'production',
   },
-  // Use the shared transpile modules approach to use the ui-components library
+  
+  // Enable direct importing of the UI components source
   transpilePackages: ['@quikbroker/ui-components'],
+  
+  // Preserve the data-theme attribute for CSS styling
+  reactStrictMode: true,
 };
 
 export default nextConfig;

@@ -26,6 +26,7 @@ FOR EACH ROW
 EXECUTE FUNCTION app.set_updated_at();
 
 -- Create an index on the token for fast lookups
-CREATE INDEX user_invites_token_idx ON app.user_invites(token);
+DROP INDEX IF EXISTS user_invites_token_idx;
+CREATE INDEX IF NOT EXISTS user_invites_token_idx ON app.user_invites(token);
 
 COMMIT;

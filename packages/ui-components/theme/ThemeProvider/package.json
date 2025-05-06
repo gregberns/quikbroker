@@ -1,0 +1,6 @@
+{
+  "main": "../../dist/components/theme/ThemeProvider.js",
+  "module": "../../dist/components/theme/ThemeProvider.mjs",
+  "types": "../../dist/components/theme/ThemeProvider.d.ts",
+  "sideEffects": false
+}

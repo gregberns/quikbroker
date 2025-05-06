@@ -1,0 +1,6 @@
+{
+  "main": "../dist/theme/index.js",
+  "module": "../dist/theme/index.mjs",
+  "types": "../dist/theme/index.d.ts",
+  "sideEffects": false
+}

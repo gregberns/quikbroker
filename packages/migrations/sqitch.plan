@@ -13,3 +13,4 @@ carriers_table [appschema updated_at_function] 2023-05-02T12:04:00Z QuikBroker T
 user_invites_table [appschema updated_at_function users_table] 2023-05-02T12:05:00Z QuikBroker Team <dev@quikbroker.com> # Add user invites table
 jobs_table [appschema updated_at_function] 2023-05-02T12:06:00Z QuikBroker Team <dev@quikbroker.com> # Add jobs table for background processing
 signups_table [appschema updated_at_function] 2023-05-02T12:07:00Z QuikBroker Team <dev@quikbroker.com> # Add signups table for tracking new registrations
+fmcsa_view [appschema] 2023-05-16T14:00:00Z QuikBroker Team <dev@quikbroker.com> # Add view for FMCSA carrier data

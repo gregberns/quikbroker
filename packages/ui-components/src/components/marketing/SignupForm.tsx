@@ -48,8 +48,9 @@ export function SignupForm({
       await new Promise(resolve => setTimeout(resolve, 500));
       
       // Redirect to signup page with email as query param
-      // @ts-expect-error fuck typescript
-      router.push(`${redirectPath}?email=${encodeURIComponent(email)}`);
+      if (typeof window !== 'undefined') {
+        window.location.href = `${redirectPath}?email=${encodeURIComponent(email)}`;
+      }
     } catch (err: unknown) {
       console.error("Signup submission error:", err);
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
