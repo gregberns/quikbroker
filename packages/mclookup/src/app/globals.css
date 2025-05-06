@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom styling for UI components */
+
 @layer base {
   :root {
     --background: 0 0% 100%;

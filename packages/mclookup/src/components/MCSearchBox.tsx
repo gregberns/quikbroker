@@ -47,7 +47,7 @@ export function MCSearchBox({ onSearch, isLoading = false }: MCSearchBoxProps) {
         </div>
         <Button 
           type="submit"
-          className="absolute right-2 top-2 h-10 px-6 rounded-full"
+          className="absolute right-2 top-2 h-10 px-6 rounded-full btn-primary"
           disabled={!mcNumber.trim() || isLoading}
         >
           {isLoading ? 'Searching...' : 'Search'}

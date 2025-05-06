@@ -9,3 +9,5 @@ packages/app/logs/
 logs/
 
 **/.claude/settings.local.json
+
+.next
