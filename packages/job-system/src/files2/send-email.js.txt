@@ -1,0 +1,38 @@
+import type { Task, WorkerUtils } from "graphile-worker";
+import { ses } from "./aws";
+
+interface Payload {
+  to: string;
+  subject: string;
+  body: string;
+}
+
+function assertPayload(payload: any): asserts payload is Payload {
+  if (typeof payload !== "object" || !payload) throw new Error("invalid");
+  if (typeof payload.to !== "string") throw new Error("invalid");
+  if (typeof payload.subject !== "string") throw new Error("invalid");
+  if (typeof payload.body !== "string") throw new Error("invalid");
+}
+
+export const send_email: Task = async function (payload) {
+  assertPayload(payload);
+  const { to, subject, body } = payload;
+  await ses.sendEmail({
+    Destination: {
+      ToAddresses: [to],
+      FromAddresses: ["no-reply@example.com"],
+    },
+    Message: {
+      Subject: {
+        Charset: "UTF-8",
+        Data: subject,
+      },
+      Body: {
+        Text: {
+          Charset: "UTF-8",
+          Data: body,
+        },
+      },
+    },
+  });
+};

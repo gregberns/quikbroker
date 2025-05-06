@@ -5,9 +5,12 @@ import { withUsageTracking } from "../../../lib/usageTracking";
 
 const GET_handler = async (
   req: NextRequest,
-  { params }: { params: { dot_number: string } }
+  { params }: { params: Promise<{ dot_number: string }> }
 ) => {
   try {
+    // Properly await the params object
+    const { dot_number } = await params;
+    
     // Get client IP for rate limiting
     const ip = req.headers.get('x-forwarded-for') || 'unknown';
     
@@ -19,8 +22,6 @@ const GET_handler = async (
     if (rateLimitResponse) {
       return rateLimitResponse;
     }
-
-    const { dot_number } = params;
     
     if (!dot_number) {
       return NextResponse.json(
@@ -54,7 +55,7 @@ const GET_handler = async (
     }, 
     { headers: rateLimitResult.headers });
   } catch (error) {
-    console.error(`Error fetching FMCSA carrier data for DOT number ${params.dot_number}:`, error);
+    console.error(`Error fetching FMCSA carrier data:`, error);
     return NextResponse.json(
       { message: "An error occurred while fetching carrier data" },
       { status: 500 }
