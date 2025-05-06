@@ -1,8 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Custom styling for UI components */
+@import "tailwindcss";
 
 @layer base {
   :root {
