@@ -1,8 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // Important: Add corePlugins: { preflight: false } to avoid conflicting with our manually added styles
-  corePlugins: { preflight: true },
-  darkMode: ['class', '[data-theme="dark"]'],
+  darkMode: ["class"],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
