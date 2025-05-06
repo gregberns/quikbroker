@@ -1,6 +1,7 @@
 import { CarrierInfo } from '../components/CarrierInfoCard';
 
-const API_BASE_URL = '/api/fmcsa';
+// Read from environment variable, with fallback for local development
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api';
 
 /**
  * Interface for API responses when fetching carrier info
@@ -27,7 +28,7 @@ interface ApiError {
  */
 export async function fetchCarrierByDotNumber(dotNumber: string): Promise<{ data: CarrierInfo | null; error: ApiError | null; rateLimited: boolean }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/${dotNumber}`);
+    const response = await fetch(`${API_BASE_URL}/fmcsa/${dotNumber}`);
     
     // Check for rate limiting
     if (response.status === 429) {
