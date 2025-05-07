@@ -285,6 +285,8 @@ jobs:
 
           # export RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
 
+          echo "Dog" ${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
+
           RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway link
 
           # ${{ secrets.RAILWAY_MCLOOKUP_SERVICE_ID }}
