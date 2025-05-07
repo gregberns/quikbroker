@@ -23,6 +23,7 @@
     "ui:clean": "yarn workspace @quikbroker/ui-components clean",
     "mclookup:dev": "yarn workspace @quikbroker/mclookup dev",
     "mclookup:build": "yarn workspace @quikbroker/mclookup build",
+    "mclookup:export": "yarn workspace @quikbroker/mclookup build",
     "mclookup:start": "yarn workspace @quikbroker/mclookup start",
     "mclookup:lint": "yarn workspace @quikbroker/mclookup lint",
     "schema:new": "dotenv -f .env yarn workspace @quikbroker/schema create-migration",

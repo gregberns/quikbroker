@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Only enable image optimization for production
+  // Configure for static site generation
+  output: 'export',
+  
+  // Disable image optimization for static export
   images: {
-    unoptimized: process.env.NODE_ENV !== 'production',
+    unoptimized: true,
   },
   
   // Enable direct importing of the UI components source
@@ -10,6 +13,9 @@ const nextConfig = {
   
   // Preserve the data-theme attribute for CSS styling
   reactStrictMode: true,
+  
+  // Required for static export to Railway
+  distDir: 'out',
 };
 
 export default nextConfig;

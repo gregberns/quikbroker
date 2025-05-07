@@ -1,0 +1,26 @@
+# Build artifacts
+.next
+node_modules
+out
+
+# Development files
+.git
+.github
+.vscode
+*.log
+.DS_Store
+.env*
+!.env.example
+
+# Test files
+__tests__
+*.test.*
+*.spec.*
+
+# Documentation
+*.md
+!README.md
+
+# Caches
+.turbo
+.cache
