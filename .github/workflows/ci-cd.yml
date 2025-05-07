@@ -289,7 +289,7 @@ jobs:
         run: |
           service="beneficial-magic"
           error_code=0
-          railwayCmd="railway up --service ${ secrets.RAILWAY_MCLOOKUP_SERVICE_ID } "${service}""
+          railwayCmd="railway up --service ${{ secrets.RAILWAY_MCLOOKUP_SERVICE_ID }} "${service}""
           eval $railwayCmd || error_code=$?
 
           if [ "${error_code}" -ne 0 ]; then
