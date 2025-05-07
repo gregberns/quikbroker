@@ -73,6 +73,7 @@ jobs:
     outputs:
       migrations_image: ${{ steps.migrations-tag.outputs.image }}
       app_image: ${{ steps.app-tag.outputs.image }}
+      mclookup_image: ${{ steps.mclookup-tag.outputs.image }}
 
     steps:
       - name: Checkout repository
@@ -159,6 +160,42 @@ jobs:
           FIRST_TAG=$(echo "${{ steps.app-meta.outputs.tags }}" | cut -d',' -f1 | xargs)
           echo "image=$FIRST_TAG" >> $GITHUB_OUTPUT
           echo "Using app image tag: $FIRST_TAG"
+          
+      # Build mclookup image
+      - name: Extract metadata for mclookup image
+        id: mclookup-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/mclookup
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=sha,format=short
+          # Output a single tag for easy processing
+          sep-tags: ","
+          sep-labels: ","
+
+      - name: Build and push mclookup image
+        id: build-mclookup
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./packages/mclookup/Dockerfile
+          push: true
+          tags: ${{ steps.mclookup-meta.outputs.tags }}
+          labels: ${{ steps.mclookup-meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/mclookup:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/mclookup:buildcache,mode=max
+
+      - name: Set mclookup image tag
+        id: mclookup-tag
+        run: |
+          # Extract first tag (now using comma as separator)
+          FIRST_TAG=$(echo "${{ steps.mclookup-meta.outputs.tags }}" | cut -d',' -f1 | xargs)
+          echo "image=$FIRST_TAG" >> $GITHUB_OUTPUT
+          echo "Using mclookup image tag: $FIRST_TAG"
 
   # Run tests (if any)
   test:

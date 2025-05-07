@@ -34,6 +34,19 @@ services:
     depends_on:
       - db
 
+  mclookup:
+    build:
+      context: .
+      dockerfile: ./packages/mclookup/Dockerfile
+    restart: always
+    ports:
+      # - "3003:3000"
+      - "3004:80"
+    env_file:
+      - .env
+    depends_on:
+      - app
+
   migrate:
     build:
       context: ./packages/migrations

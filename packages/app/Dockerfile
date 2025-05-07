@@ -34,6 +34,8 @@ COPY packages/app/package.json ./packages/app/package.json
 COPY packages/app/tsconfig.json ./packages/app/tsconfig.json
 COPY packages/app/next.config.ts ./packages/app/next.config.ts
 
+COPY packages/ui-components/ ./packages/ui-components/
+
 # Set up workspace and install dependencies
 # First install with development dependencies to allow for proper building
 RUN yarn install --production --pure-lockfile --non-interactive --cache-folder ./ycache; rm -rf ./ycache
