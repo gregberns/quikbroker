@@ -57,8 +57,9 @@ export async function fetchCarrierByDotNumber(dotNumber: string): Promise<{
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      // Enable credentials for cross-origin requests
-      credentials: "include",
+      // Enable credentials for cross-origin requests only in production
+      // This avoids CORS issues when the origin isn't explicitly allowed
+      credentials: process.env.NODE_ENV === "production" ? "include" : "same-origin",
     });
 
     // Check for rate limiting
