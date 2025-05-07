@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "./theme/ThemeProvider";
-import { Header } from '../../../ui-components/src/components/marketing/Header';
-import { Footer } from '../../../ui-components/src/components/marketing/Footer';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,11 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider defaultTheme="mclookup" themes={['light', 'dark', 'mclookup']}>
           <div className="flex min-h-screen flex-col bg-background text-foreground">
             <Header />
-            <main className="flex-grow">
+            <main className="flex-grow w-full">
               {children}
             </main>
             <Footer />

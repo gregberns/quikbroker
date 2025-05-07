@@ -10,6 +10,7 @@ import { AlertCircle, ArrowUp } from 'lucide-react';
 import { MCSearchBox } from '../components/MCSearchBox';
 import { CarrierInfoCard, CarrierInfo } from '../components/CarrierInfoCard';
 import { MarketingSection } from '../components/MarketingSection';
+import { APISection } from '../components/APISection';
 
 // API
 import { fetchCarrierByDotNumber, RateLimitInfo } from '../lib/api';
@@ -116,6 +117,9 @@ export default function HomePage() {
       <div id="info">
         <MarketingSection />
       </div>
+      
+      {/* API Section */}
+      <APISection />
       
       {/* Scroll to top button */}
       {showScrollToTop && (

@@ -79,7 +79,7 @@ export function SignupForm({
             />
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full border border-primary-foreground" disabled={isLoading}>
             {isLoading ? (
               <span className="flex items-center justify-center">
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

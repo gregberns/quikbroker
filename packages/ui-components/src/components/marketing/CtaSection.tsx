@@ -34,7 +34,7 @@ export function CtaSection({
             {description}
           </p>
           <div className="mt-10 flex items-center justify-center gap-6 flex-col sm:flex-row">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="border border-primary-foreground">
               <Link href={primaryAction.href}>{primaryAction.text}</Link>
             </Button>
             {secondaryAction && (

@@ -37,7 +37,7 @@ export function TrustSection({
     {
       icon: <ShieldCheck className="h-6 w-6" />,
       title: "Enterprise-Grade Security",
-      description: "End-to-end encryption for all data with SOC 2 compliance and regular security audits."
+      description: "End-to-end encryption for all data with regular security audits and industry best practices."
     },
     {
       icon: <Lock className="h-6 w-6" />,
@@ -46,8 +46,8 @@ export function TrustSection({
     },
     {
       icon: <FileCheck className="h-6 w-6" />,
-      title: "FMCSA Compliance",
-      description: "Automated compliance with Federal Motor Carrier Safety Administration regulations."
+      title: "Regulatory Compliance",
+      description: "Automated compliance with transportation industry regulations and standards."
     },
     {
       icon: <BadgeCheck className="h-6 w-6" />,
@@ -76,13 +76,7 @@ export function TrustSection({
             ))}
           </div>
           
-          <div className="mt-12 flex flex-wrap justify-center gap-6">
-            {/* Security badges/logos - can be replaced with actual images by marketing team */}
-            <div className="flex items-center justify-center h-16 w-24 bg-muted/30 rounded-md text-sm font-medium">SOC 2</div>
-            <div className="flex items-center justify-center h-16 w-24 bg-muted/30 rounded-md text-sm font-medium">GDPR</div>
-            <div className="flex items-center justify-center h-16 w-32 bg-muted/30 rounded-md text-sm font-medium">FMCSA Verified</div>
-            <div className="flex items-center justify-center h-16 w-36 bg-muted/30 rounded-md text-sm font-medium">256-bit Encryption</div>
-          </div>
+          {/* Security badges removed as requested */}
         </div>
       </div>
     </div>

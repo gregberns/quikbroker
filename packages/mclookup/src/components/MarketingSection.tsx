@@ -3,7 +3,7 @@
 import { Container } from '../../../ui-components/src/components/ui/container';
 import { Separator } from '../../../ui-components/src/components/ui/separator';
 import { FeatureCard } from '../../../ui-components/src/components/marketing/FeatureCard';
-import { CtaSection } from '../../../ui-components/src/components/marketing/CtaSection';
+import { SignupForm } from '../../../ui-components/src/components/marketing/SignupForm';
 import { 
   Search, 
   CheckCircle, 
@@ -179,19 +179,29 @@ export function MarketingSection() {
         </Container>
       </div>
       
-      {/* CTA Section */}
-      <CtaSection 
-        title="Ready to streamline your carrier management?"
-        description="Join thousands of freight brokers who trust QuikBroker for carrier compliance and onboarding."
-        primaryAction={{ 
-          text: "Start Your Free Trial", 
-          href: "https://quikbroker.com/signup" 
-        }}
-        secondaryAction={{ 
-          text: "Schedule a Demo", 
-          href: "https://quikbroker.com/demo" 
-        }}
-      />
+      {/* CTA Section with Signup Form */}
+      <div className="py-16">
+        <Container>
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
+                Ready to streamline your carrier management?
+              </h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Join thousands of freight brokers who trust QuikBroker for carrier compliance and onboarding.
+                Get started today with a free trial.
+              </p>
+            </div>
+            <div className="flex-1">
+              <SignupForm 
+                title="Get Started Today"
+                description="Enter your email to begin your free trial of QuikBroker Pro."
+                redirectPath="https://quikbroker.com/signup"
+              />
+            </div>
+          </div>
+        </Container>
+      </div>
     </div>
   );
 }

@@ -103,7 +103,7 @@ function HomePageContent() {
 
       <main className="flex-grow">
         {/* Hero Section */}
-        <HeroSection />
+        <HeroSection secondaryCta={undefined} />
         
         {/* Stats Section */}
         <StatsSection 
@@ -151,8 +151,7 @@ function HomePageContent() {
         <CtaSection 
           title="Ready to transform your carrier management?"
           description="Join the growing number of freight brokers who are enhancing their bottom line through streamlined operations and reduced risk with QuikBroker."
-          primaryAction={{ text: "Get Started", href: { pathname: "#signup-form" } }}
-          secondaryAction={{ text: "Schedule Demo", href: { pathname: "/demo" } }}
+          primaryAction={{ text: "Get Started", href: { pathname: "signup" } }}
         />
         
         {/* Signup Form */}
