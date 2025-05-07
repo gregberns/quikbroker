@@ -103,7 +103,7 @@ function HomePageContent() {
 
       <main className="flex-grow">
         {/* Hero Section */}
-        <HeroSection secondaryCta={undefined} />
+        <HeroSection secondaryCta={null} />
         
         {/* Stats Section */}
         <StatsSection 

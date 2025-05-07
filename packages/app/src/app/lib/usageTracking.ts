@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 // Interface for usage tracking data
 export interface UsageTrackingData {
   ip: string;
@@ -52,9 +54,9 @@ export async function trackApiUsage(data: UsageTrackingData): Promise<void> {
  * @returns A wrapped handler function that tracks usage
  */
 export function withUsageTracking<T extends unknown[]>(
-  handler: (...args: T) => Promise<Response>
-): (...args: T) => Promise<Response> {
-  return async (...args: T): Promise<Response> => {
+  handler: (...args: T) => Promise<NextResponse | Response>
+): (...args: T) => Promise<NextResponse> {
+  return async (...args: T): Promise<NextResponse> => {
     const startTime = Date.now();
     const req = args[0] as Request;
     const url = new URL(req.url);
@@ -74,24 +76,42 @@ export function withUsageTracking<T extends unknown[]>(
     });
 
     try {
-      const response = await handler(...args);
+      const originalResponse = await handler(...args);
+
+      // Convert to NextResponse if it's not already
+      const response =
+        originalResponse instanceof NextResponse
+          ? originalResponse
+          : NextResponse.json(await originalResponse.json(), {
+              status: originalResponse.status,
+              headers: originalResponse.headers,
+            });
 
       // Track successful requests
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
-      await trackApiUsage({
+      // Create the usage data object with only the required fields first
+      const trackingData: UsageTrackingData = {
         ip: req.headers.get("x-forwarded-for") || "unknown",
         user_agent: req.headers.get("user-agent") || "unknown",
         endpoint: url.pathname,
-        query_params:
-          Object.keys(queryParams).length > 0 ? queryParams : undefined,
-        dot_number:
-          dotNumber || url.searchParams.get("dot_number") || undefined,
         response_status: response.status,
         response_time: responseTime,
         timestamp: new Date(),
-      });
+      };
+      
+      // Add optional fields only if they have values
+      if (Object.keys(queryParams).length > 0) {
+        trackingData.query_params = queryParams;
+      }
+      
+      const extractedDotNumber = dotNumber || url.searchParams.get("dot_number") || null;
+      if (extractedDotNumber) {
+        trackingData.dot_number = extractedDotNumber;
+      }
+      
+      await trackApiUsage(trackingData);
 
       return response;
     } catch (error) {
@@ -99,18 +119,27 @@ export function withUsageTracking<T extends unknown[]>(
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
-      await trackApiUsage({
+      // Create the usage data object with only the required fields first
+      const trackingData: UsageTrackingData = {
         ip: req.headers.get("x-forwarded-for") || "unknown",
         user_agent: req.headers.get("user-agent") || "unknown",
         endpoint: url.pathname,
-        query_params:
-          Object.keys(queryParams).length > 0 ? queryParams : undefined,
-        dot_number:
-          dotNumber || url.searchParams.get("dot_number") || undefined,
         response_status: 500,
         response_time: responseTime,
         timestamp: new Date(),
-      });
+      };
+      
+      // Add optional fields only if they have values
+      if (Object.keys(queryParams).length > 0) {
+        trackingData.query_params = queryParams;
+      }
+      
+      const extractedDotNumber = dotNumber || url.searchParams.get("dot_number") || null;
+      if (extractedDotNumber) {
+        trackingData.dot_number = extractedDotNumber;
+      }
+      
+      await trackApiUsage(trackingData);
 
       throw error;
     }

@@ -70,7 +70,9 @@ export function addCorsHeaders(req: NextRequest, res: NextResponse): NextRespons
 /**
  * Wrap response with CORS headers
  */
-export function withCors<T>(handler: (req: NextRequest, context: T) => Promise<NextResponse>) {
+export function withCors<T>(
+  handler: (req: NextRequest, context: T) => Promise<NextResponse>
+) {
   return async (req: NextRequest, context: T): Promise<NextResponse> => {
     // Handle preflight requests
     if (req.method === "OPTIONS") {

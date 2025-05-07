@@ -11,7 +11,7 @@ import { withCors, handleOptions } from "../../../lib/cors";
 const GET_handler = async (
   req: NextRequest,
   { params }: { params: Promise<{ dot_number: string }> }
-) => {
+): Promise<NextResponse> => {
   try {
     // Properly await the params object
     const { dot_number } = await params;
