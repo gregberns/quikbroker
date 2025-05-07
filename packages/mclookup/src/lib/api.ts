@@ -12,7 +12,8 @@ if (process.env.NODE_ENV !== 'production') {
  * Interface for API responses when fetching carrier info
  */
 interface CarrierResponse {
-  carrier: CarrierInfo;
+  // The carrier can be either a single object or an array of objects
+  carrier: CarrierInfo | CarrierInfo[];
   rateLimit?: {
     remaining: number;
     limit: number;
@@ -29,9 +30,23 @@ interface ApiError {
 }
 
 /**
+ * Interface for rate limit information 
+ */
+export interface RateLimitInfo {
+  remaining: number;
+  limit: number;
+  resetTime: string;
+}
+
+/**
  * Fetches carrier information by DOT/MC number
  */
-export async function fetchCarrierByDotNumber(dotNumber: string): Promise<{ data: CarrierInfo | null; error: ApiError | null; rateLimited: boolean }> {
+export async function fetchCarrierByDotNumber(dotNumber: string): Promise<{ 
+  data: CarrierInfo | null; 
+  error: ApiError | null; 
+  rateLimited: boolean;
+  rateLimit?: RateLimitInfo;
+}> {
   try {
     // Configure fetch with CORS credentials
     const response = await fetch(`${API_BASE_URL}/fmcsa/${dotNumber}`, {
@@ -46,13 +61,25 @@ export async function fetchCarrierByDotNumber(dotNumber: string): Promise<{ data
     
     // Check for rate limiting
     if (response.status === 429) {
+      // Try to extract rate limit information if available
+      let rateLimit: RateLimitInfo | undefined;
+      try {
+        const errorJson = await response.json();
+        if (errorJson.rateLimit) {
+          rateLimit = errorJson.rateLimit;
+        }
+      } catch {
+        // Ignore parsing errors
+      }
+      
       return {
         data: null,
         error: { 
           message: "You've reached the maximum number of lookups. Please try again later or create an account for unlimited access.", 
           status: 429 
         },
-        rateLimited: true
+        rateLimited: true,
+        rateLimit
       };
     }
     
@@ -90,10 +117,16 @@ export async function fetchCarrierByDotNumber(dotNumber: string): Promise<{ data
     // Parse successful response
     const data = await response.json() as CarrierResponse;
     
+    // Handle case where carrier is an array - take the first item
+    const carrierData = Array.isArray(data.carrier) 
+      ? data.carrier[0] 
+      : data.carrier;
+    
     return {
-      data: data.carrier,
+      data: carrierData,
       error: null,
-      rateLimited: false
+      rateLimited: false,
+      rateLimit: data.rateLimit
     };
   } catch (error) {
     console.error('Error fetching carrier information:', error);

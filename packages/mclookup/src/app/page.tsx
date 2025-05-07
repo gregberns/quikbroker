@@ -12,12 +12,13 @@ import { CarrierInfoCard, CarrierInfo } from '../components/CarrierInfoCard';
 import { MarketingSection } from '../components/MarketingSection';
 
 // API
-import { fetchCarrierByDotNumber } from '../lib/api';
+import { fetchCarrierByDotNumber, RateLimitInfo } from '../lib/api';
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [carrier, setCarrier] = useState<CarrierInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rateLimit, setRateLimit] = useState<RateLimitInfo | null>(null);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   
   // Handle scrolling behavior
@@ -40,7 +41,12 @@ export default function HomePage() {
     setIsLoading(true);
     
     try {
-      const { data, error, rateLimited } = await fetchCarrierByDotNumber(mcNumber);
+      const { data, error, rateLimited, rateLimit: rateLimitData } = await fetchCarrierByDotNumber(mcNumber);
+      
+      // Update rate limit information if available
+      if (rateLimitData) {
+        setRateLimit(rateLimitData);
+      }
       
       if (error) {
         setError(error.message);
@@ -82,6 +88,18 @@ export default function HomePage() {
                 <AlertCircle className="h-4 w-4 mr-2" />
                 <span>{error}</span>
               </Alert>
+            </div>
+          )}
+          
+          {/* Rate Limit Info */}
+          {rateLimit && (
+            <div className="max-w-3xl mx-auto mt-2">
+              <div className="text-xs text-center text-muted-foreground">
+                Rate limit: {rateLimit.remaining} of {rateLimit.limit} requests remaining
+                {rateLimit.resetTime && (
+                  <> • Resets at {new Date(rateLimit.resetTime).toLocaleTimeString()}</>
+                )}
+              </div>
             </div>
           )}
           
