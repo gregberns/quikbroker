@@ -26,6 +26,7 @@ env:
   DB_NAME: ${{ vars.DB_NAME }}
   DB_USER: ${{ vars.DB_USER }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
   # Railway deployment variables
   RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
@@ -160,7 +161,7 @@ jobs:
           FIRST_TAG=$(echo "${{ steps.app-meta.outputs.tags }}" | cut -d',' -f1 | xargs)
           echo "image=$FIRST_TAG" >> $GITHUB_OUTPUT
           echo "Using app image tag: $FIRST_TAG"
-          
+
       # Build mclookup image
       - name: Extract metadata for mclookup image
         id: mclookup-meta

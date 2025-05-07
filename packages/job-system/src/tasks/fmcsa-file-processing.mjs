@@ -75,7 +75,7 @@ async function createTable(pgClient, tableSchema, tableName) {
 async function uploadFile(pgClient, tableSchema, tableName) {
   const command = `COPY ${tableSchema}.${tableName} FROM STDIN WITH (FORMAT CSV, HEADER true, DELIMITER ',')`;
   // const uploadFilePath = `/worker/files/test.txt`;
-  const uploadFilePath = `/worker/files/FMCSA_CENSUS1_2025Mar/FMCSA_CENSUS1_2025Mar.txt`
+  const uploadFilePath = `/worker/files/FMCSA_CENSUS1_2025Mar/FMCSA_CENSUS1_2025Mar-TRUNCATED.txt`
 
   await pgClient.query("SET client_encoding = 'latin1';");
 
@@ -87,7 +87,8 @@ async function uploadFile(pgClient, tableSchema, tableName) {
 
 async function run(pgClient) {
   const tableSchema = "fmcsa";
-  const tableName = "fmcsa_2025Mar";
+  // const tableName = "fmcsa_2025Mar";
+  const tableName = "fmcsa_current";
 
   const tableExists = await checkTableExists(pgClient, tableSchema, tableName)
   if (!tableExists) {
