@@ -274,28 +274,34 @@ jobs:
           cd packages/mclookup
           yarn build
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
+      - name: Deploy Railway
+        uses: bervProject/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: "beneficial-magic"
 
-      - name: Deploy to Railway
-        run: |
-          # export RAILWAY_TOKEN=${{ env.RAILWAY_TOKEN }}
+      # - name: Install Railway CLI
+      #   run: npm install -g @railway/cli
 
-          # Login to Railway
-          RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway login
+      # - name: Deploy to Railway
+      #   run: |
+      #     # export RAILWAY_TOKEN=${{ env.RAILWAY_TOKEN }}
 
-          # Link to the Railway project
+      #     # Login to Railway
+      #     RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway login
 
-          # export RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
+      #     # Link to the Railway project
 
-          echo "Dog" ${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
+      #     # export RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
 
-          RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway link
+      #     echo "Dog" ${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
 
-          # ${{ secrets.RAILWAY_MCLOOKUP_SERVICE_ID }}
+      #     RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway link
 
-          # Deploy static site to Railway
-          cd packages/mclookup
-          RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway up --detach
+      #     # ${{ secrets.RAILWAY_MCLOOKUP_SERVICE_ID }}
 
-          echo "MCLookup static site deployment triggered successfully"
+      #     # Deploy static site to Railway
+      #     cd packages/mclookup
+      #     RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway up --detach
+
+      #     echo "MCLookup static site deployment triggered successfully"
