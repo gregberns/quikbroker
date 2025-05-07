@@ -279,10 +279,7 @@ jobs:
 
       - name: Deploy to Railway
         run: |
-          export RAILWAY_TOKEN=${{ env.RAILWAY_TOKEN }}
-
-          # Login to Railway
-          railway login
+          # export RAILWAY_TOKEN=${{ env.RAILWAY_TOKEN }}
 
           # Link to the Railway project
           railway link ${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
