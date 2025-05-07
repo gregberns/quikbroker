@@ -281,6 +281,9 @@ jobs:
         run: |
           # export RAILWAY_TOKEN=${{ env.RAILWAY_TOKEN }}
 
+          # Login to Railway
+          RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway login
+
           # Link to the Railway project
 
           # export RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
