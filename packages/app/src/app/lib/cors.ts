@@ -12,7 +12,7 @@ const allowedOrigins = [
   "https://quikbroker.com",
 
   // Railway domains
-  "https://beneficial-magic-production.up.railway.app", // MCLookup on Railway
+  "https://mclookup-production.up.railway.app", // MCLookup on Railway
   "https://quikbroker-production.up.railway.app", // App on Railway
 ];
 
@@ -37,33 +37,41 @@ export function corsHeaders(req: NextRequest): Record<string, string> {
   }
 
   // For Railway and local development environment matching
-  const isRailwayOrigin = origin.includes("railway.app");
-  const isLocalOrigin = origin.startsWith("http://localhost:");
+  // const isRailwayOrigin = origin.includes("railway.app");
+  // const isLocalOrigin = origin.startsWith("http://localhost:");
+
+  // HACK
+  // HACK
+  // HACK
+  // HACK
+  // headers["Access-Control-Allow-Origin"] = origin;
+  headers["Access-Control-Allow-Origin"] = "*";
+  headers["Access-Control-Allow-Credentials"] = "true";
 
   // Check if the origin is in our allowed list or matches pattern
-  if (
-    allowedOrigins.includes(origin) ||
-    (isRailwayOrigin && origin.includes("beneficial-magic")) ||
-    isLocalOrigin
-  ) {
-    // Reflect the requesting origin (not '*'), for credentials to work
-    headers["Access-Control-Allow-Origin"] = origin;
-    // Allow credentials (cookies, authorization headers)
-    headers["Access-Control-Allow-Credentials"] = "true";
+  // if (
+  //   allowedOrigins.includes(origin) ||
+  //   (isRailwayOrigin && origin.includes("beneficial-magic")) ||
+  //   isLocalOrigin
+  // ) {
+  //   // Reflect the requesting origin (not '*'), for credentials to work
+  //   headers["Access-Control-Allow-Origin"] = origin;
+  //   // Allow credentials (cookies, authorization headers)
+  //   headers["Access-Control-Allow-Credentials"] = "true";
 
-    // In development, log allowed origin
-    if (process.env.NODE_ENV !== "production") {
-      console.log(`CORS: Allowed origin with credentials: ${origin}`);
-    }
-  } else {
-    // For unrecognized origins, we'll still allow the request but without credentials
-    headers["Access-Control-Allow-Origin"] = "*";
+  //   // In development, log allowed origin
+  //   if (process.env.NODE_ENV !== "production") {
+  //     console.log(`CORS: Allowed origin with credentials: ${origin}`);
+  //   }
+  // } else {
+  //   // For unrecognized origins, we'll still allow the request but without credentials
+  //   headers["Access-Control-Allow-Origin"] = "*";
 
-    // In development, log disallowed origin
-    if (process.env.NODE_ENV !== "production") {
-      console.log(`CORS: Unrecognized origin, using '*': ${origin}`);
-    }
-  }
+  //   // In development, log disallowed origin
+  //   if (process.env.NODE_ENV !== "production") {
+  //     console.log(`CORS: Unrecognized origin, using '*': ${origin}`);
+  //   }
+  // }
 
   return headers;
 }
