@@ -282,10 +282,15 @@ jobs:
           # export RAILWAY_TOKEN=${{ env.RAILWAY_TOKEN }}
 
           # Link to the Railway project
-          railway link ${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
+
+          # export RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }}
+
+          RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway link
+
+          # ${{ secrets.RAILWAY_MCLOOKUP_SERVICE_ID }}
 
           # Deploy static site to Railway
           cd packages/mclookup
-          railway up --service ${{ secrets.RAILWAY_MCLOOKUP_SERVICE_ID }} --detach
+          RAILWAY_API_TOKEN=${{ secrets.RAILWAY_MCLOOKUP_PROJECT_ID }} railway up --detach
 
           echo "MCLookup static site deployment triggered successfully"
