@@ -274,15 +274,29 @@ jobs:
           cd packages/mclookup
           yarn build
 
-      - name: Deploy Railway
-        uses: bervProject/railway-deploy@main
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        with:
-          service: "beneficial-magic"
+      # - name: Deploy Railway
+      #   uses: bervProject/railway-deploy@main
+      #   env:
+      #     RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      #   with:
+      #     service: "beneficial-magic"
+      #     detach: "false"
 
-      # - name: Install Railway CLI
-      #   run: npm install -g @railway/cli
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: |
+          service="beneficial-magic"
+          error_code=0
+          railwayCmd="railway up --service ${ secrets.RAILWAY_MCLOOKUP_SERVICE_ID } "${service}""
+          eval $railwayCmd || error_code=$?
+
+          if [ "${error_code}" -ne 0 ]; then
+              exit $error_code
+          else
+              echo "status=Success" >> $GITHUB_OUTPUT
+          fi
 
       # - name: Deploy to Railway
       #   run: |
