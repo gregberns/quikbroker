@@ -46,7 +46,10 @@ export interface CarrierInfo {
   driver_total: string | null;
   recent_mileage: string | null;
   recent_mileage_year: string | null;
-  // Additional fields omitted for brevity
+  authorized_for_hire: string | null;
+  private_property: string | null;
+  exempt_for_hire: string | null;
+  us_mail: string | null;
 }
 
 interface CarrierInfoCardProps {

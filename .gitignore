@@ -11,9 +11,9 @@ logs/
 **/.claude/settings.local.json
 
 .next
+out
 
 packages/job-system/files/FMCSA_CENSUS1_2025Mar.zip
-
 packages/job-system/files/FMCSA_CENSUS1_2025Mar/FMCSA_CENSUS1_2025Mar.txt
-
 packages/job-system/files/FMCSA_CENSUS1_2025Mar/ReadMe_Census.txt
+
