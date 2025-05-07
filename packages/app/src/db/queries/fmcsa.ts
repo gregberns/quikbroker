@@ -2,7 +2,7 @@
 // @ts-nocheck
 import { z } from "zod";
 import * as db from "zapatos/db";
-import type * as s from "zapatos/schema";
+// import type * as s from "zapatos/schema";
 import { sql } from "../client";
 
 // Zod schema for FMCSA carrier lookup input
@@ -90,7 +90,7 @@ export async function searchFMCSACarriers(
 ): Promise<{ carriers: FMCSACarrier[]; total: number }> {
   // Start with empty WHERE condition
   let whereClause = "";
-  const queryParams: any[] = [];
+  const queryParams: unknown[] = [];
   let paramIndex = 1;
 
   // Build WHERE clause using properly parameterized conditions
