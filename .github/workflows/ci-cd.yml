@@ -189,7 +189,7 @@ jobs:
           labels: ${{ steps.mclookup-meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/mclookup:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/mclookup:buildcache,mode=max
-          secret-envs: NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL }}
+          secret-envs: NEXT_PUBLIC_API_BASE_URL=${{ env.NEXT_PUBLIC_API_BASE_URL }}
 
       - name: Set mclookup image tag
         id: mclookup-tag
