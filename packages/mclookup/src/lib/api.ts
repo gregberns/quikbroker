@@ -59,7 +59,11 @@ export async function fetchCarrierByDotNumber(dotNumber: string): Promise<{
       },
       // Enable credentials for cross-origin requests only in production
       // This avoids CORS issues when the origin isn't explicitly allowed
-      credentials: process.env.NODE_ENV === "production" ? "include" : "same-origin",
+      // credentials: process.env.NODE_ENV === "production" ? "include" : "same-origin",
+      //
+      // HACK
+      //
+      credentials: "same-origin",
     });
 
     // Check for rate limiting
