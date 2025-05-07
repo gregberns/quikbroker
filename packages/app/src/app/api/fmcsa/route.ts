@@ -7,6 +7,7 @@ import {
 } from "@/db/queries/fmcsa";
 import { checkRateLimit, getRateLimitResponse, RATE_LIMIT } from "../../lib/rateLimit";
 import { withUsageTracking } from "../../lib/usageTracking";
+import { withCors, handleOptions } from "../../lib/cors";
 
 // Wrap the handler with usage tracking
 const GET_handler = async (req: NextRequest) => {
@@ -102,5 +103,8 @@ const GET_handler = async (req: NextRequest) => {
   }
 };
 
-// Export the handler with usage tracking
-export const GET = withUsageTracking(GET_handler);
+// Add OPTIONS handler for CORS preflight requests
+export const OPTIONS = handleOptions;
+
+// Export the handler with usage tracking and CORS support
+export const GET = withCors(withUsageTracking(GET_handler));
