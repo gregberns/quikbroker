@@ -333,4 +333,315 @@ const handleSubmit = async (event) => {
 };
 ```
 
+## Testing Best Practices
+
+### Unit Testing Requirements
+
+**All domain logic in `packages/app/src/lib/domain` MUST have comprehensive unit tests.**
+
+Domain logic is the core business logic of the application and should be thoroughly tested to ensure reliability and prevent regressions.
+
+### Testing Framework Setup
+
+Use Jest with Testing Library for testing:
+
+```bash
+# Install testing dependencies
+yarn add -D jest @types/jest @testing-library/jest-dom @testing-library/react testing-library/user-event jest-environment-jsdom
+```
+
+**jest.config.js:**
+```javascript
+const nextJest = require('next/jest')
+
+const createJestConfig = nextJest({
+  // Provide the path to your Next.js app to load next.config.js and .env files
+  dir: './',
+})
+
+const customJestConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'jsdom',
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  testMatch: [
+    '**/__tests__/**/*.(ts|tsx|js)',
+    '**/*.(test|spec).(ts|tsx|js)'
+  ],
+  collectCoverageFrom: [
+    'src/lib/domain/**/*.(ts|tsx)',
+    'src/lib/**/*.(ts|tsx)',
+    '!src/**/*.d.ts',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+    './src/lib/domain/': {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+  },
+}
+
+module.exports = createJestConfig(customJestConfig)
+```
+
+### Domain Logic Testing Patterns
+
+#### 1. Pure Function Testing
+
+For pure functions (no side effects), test all input/output combinations:
+
+```typescript
+// src/lib/domain/__tests__/invitations.test.ts
+import { validateInvitationRequest } from '../invitations';
+
+describe('validateInvitationRequest', () => {
+  it('should return valid result for numeric string', () => {
+    const result = validateInvitationRequest('123');
+    
+    expect(result.isValid).toBe(true);
+    expect(result.entityId).toBe(123);
+    expect(result.error).toBeUndefined();
+  });
+
+  it('should return invalid result for non-numeric string', () => {
+    const result = validateInvitationRequest('abc');
+    
+    expect(result.isValid).toBe(false);
+    expect(result.entityId).toBeUndefined();
+    expect(result.error).toEqual({
+      message: 'Invalid ID',
+      statusCode: 400
+    });
+  });
+
+  it('should return invalid result for empty string', () => {
+    const result = validateInvitationRequest('');
+    
+    expect(result.isValid).toBe(false);
+    expect(result.error?.message).toBe('Invalid ID');
+  });
+});
+```
+
+#### 2. Complex Function Testing with Mocks
+
+For functions with dependencies, use mocks to isolate the logic:
+
+```typescript
+// src/lib/domain/__tests__/invitations.test.ts
+import { sendInvitation } from '../invitations';
+import { createUserInvite } from '@/db/queries/userInvites';
+import { createJob } from '@/db/queries/jobs';
+
+// Mock external dependencies
+jest.mock('@/db/queries/userInvites');
+jest.mock('@/db/queries/jobs');
+jest.mock('@/db/client');
+
+const mockCreateUserInvite = createUserInvite as jest.MockedFunction<typeof createUserInvite>;
+const mockCreateJob = createJob as jest.MockedFunction<typeof createJob>;
+
+describe('sendInvitation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should successfully send invitation for broker with user association', async () => {
+    // Arrange
+    const entity = {
+      id: 1,
+      name: 'Test Broker',
+      email: 'broker@example.com',
+      owner_user_id: 123
+    };
+    
+    const config = {
+      entityType: 'broker' as const,
+      requiresUserAssociation: true,
+      taskIdentifier: 'broker_email_invite',
+      emailField: 'email'
+    };
+
+    const mockUpdateFn = jest.fn().mockResolvedValue({});
+    const mockSession = { id: 'user1', role: 'admin' };
+    const mockReq = { url: '/api/test' } as any;
+
+    mockCreateUserInvite.mockResolvedValue({ id: 1, token: 'test-token' } as any);
+    mockCreateJob.mockResolvedValue({ id: 1 } as any);
+
+    // Act
+    const result = await sendInvitation(entity, config, mockUpdateFn, mockSession, mockReq);
+
+    // Assert
+    expect(result.success).toBe(true);
+    expect(result.message).toBe('Invitation sent to broker@example.com');
+    expect(mockCreateUserInvite).toHaveBeenCalledWith({
+      user_id: 123,
+      token: expect.any(String),
+      expires_at: expect.any(Date)
+    });
+    expect(mockUpdateFn).toHaveBeenCalledWith(1, {
+      invitation_sent_at: expect.any(Date)
+    });
+  });
+
+  it('should return error when broker has no associated user', async () => {
+    // Arrange
+    const entity = {
+      id: 1,
+      name: 'Test Broker',
+      email: 'broker@example.com',
+      owner_user_id: null
+    };
+    
+    const config = {
+      entityType: 'broker' as const,
+      requiresUserAssociation: true,
+      taskIdentifier: 'broker_email_invite',
+      emailField: 'email'
+    };
+
+    const mockUpdateFn = jest.fn();
+    const mockSession = { id: 'user1', role: 'admin' };
+    const mockReq = { url: '/api/test' } as any;
+
+    // Act
+    const result = await sendInvitation(entity, config, mockUpdateFn, mockSession, mockReq);
+
+    // Assert
+    expect(result.success).toBe(false);
+    expect(result.statusCode).toBe(400);
+    expect(result.message).toBe('broker has no associated user. Please assign a user first.');
+    expect(mockUpdateFn).not.toHaveBeenCalled();
+  });
+});
+```
+
+#### 3. Test File Organization
+
+```
+src/lib/domain/
+├── invitations.ts
+├── __tests__/
+│   ├── invitations.test.ts
+│   └── helpers.ts (shared test utilities)
+└── types.ts
+```
+
+#### 4. Test Coverage Requirements
+
+- **Domain Logic**: 90%+ coverage required
+- **All Public Functions**: Must have tests
+- **Edge Cases**: Test error conditions, boundary values, null/undefined inputs
+- **Business Logic**: Test all decision paths and business rules
+
+### Test Naming Conventions
+
+```typescript
+describe('FunctionName', () => {
+  describe('when condition', () => {
+    it('should expected behavior', () => {
+      // Test implementation
+    });
+  });
+  
+  it('should handle edge case description', () => {
+    // Edge case test
+  });
+});
+```
+
+### Test Data Management
+
+Create test fixtures for consistent test data:
+
+```typescript
+// src/lib/domain/__tests__/fixtures.ts
+export const mockBrokerEntity = {
+  id: 1,
+  name: 'Test Broker',
+  email: 'broker@example.com',
+  owner_user_id: 123
+};
+
+export const mockCarrierEntity = {
+  id: 2,
+  name: 'Test Carrier',
+  email: 'carrier@example.com',
+  owner_user_id: null
+};
+
+export const brokerInvitationConfig = {
+  entityType: 'broker' as const,
+  requiresUserAssociation: true,
+  taskIdentifier: 'broker_email_invite',
+  emailField: 'email'
+};
+```
+
+### Continuous Integration
+
+Tests must pass before code can be merged:
+
+```bash
+# Add to package.json scripts
+{
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:domain": "jest src/lib/domain"
+  }
+}
+```
+
+### Mock Guidelines
+
+1. **Mock External Dependencies**: Database calls, API calls, file system operations
+2. **Don't Mock Domain Logic**: Test the actual business logic, not mocks
+3. **Use Type-Safe Mocks**: Leverage TypeScript for mock type safety
+4. **Reset Mocks**: Clear mocks between tests to avoid test interference
+
+### Testing Anti-Patterns to Avoid
+
+❌ **Don't test implementation details**
+```typescript
+// BAD - testing internal variable names
+expect(result.internalVariable).toBeDefined();
+```
+
+❌ **Don't write tests that are too broad**
+```typescript
+// BAD - testing too many things at once
+it('should handle everything', () => {
+  // 50 lines of test code testing multiple functions
+});
+```
+
+❌ **Don't rely on test order**
+```typescript
+// BAD - tests depending on each other
+it('should create user', () => { /* creates user */ });
+it('should update that user', () => { /* depends on previous test */ });
+```
+
+✅ **Do write focused, isolated tests**
+```typescript
+// GOOD - focused test with clear purpose
+it('should return error when email is invalid', () => {
+  const result = validateEmail('invalid-email');
+  expect(result.isValid).toBe(false);
+  expect(result.error).toBe('Invalid email format');
+});
+```
+
 These best practices are evolving guidelines. Feel free to suggest improvements or additions as the project grows.

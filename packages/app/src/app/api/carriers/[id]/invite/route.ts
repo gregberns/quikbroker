@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "../../../../lib/auth";
 import { getCarrierById } from "@/db/queries/carriers";
+import { updateCarrier } from "@/db/queries/carriers";
+import { 
+  sendInvitation, 
+  validateInvitationRequest, 
+  createInvitationResponse,
+  type InvitationConfig 
+} from "../../../../lib/domain/invitations";
 
-// import * as crypto from "crypto";
-import { sql } from "@/db/client";
-import * as db from "zapatos/db";
-
-// NOTE: This function is kept for future use when implementing actual carrier invite tokens
-// Helper function to generate a secure random token
-// function generateSecureToken(length = 32) {
-//   return crypto.randomBytes(length).toString("hex");
-// }
+const CARRIER_INVITATION_CONFIG: InvitationConfig = {
+  entityType: 'carrier',
+  requiresUserAssociation: false,
+  taskIdentifier: 'carrier_email_invite',
+  emailField: 'email',
+};
 
 export async function POST(
   req: NextRequest,
@@ -28,59 +32,42 @@ export async function POST(
         );
       }
 
-      try {
-        const carrierId = parseInt(id);
-
-        if (isNaN(carrierId)) {
-          return NextResponse.json(
-            { message: "Invalid carrier ID" },
-            { status: 400 }
-          );
-        }
-
-        // Find the carrier
-        const carriers = await getCarrierById(carrierId);
-
-        if (!carriers || carriers.length === 0) {
-          return NextResponse.json(
-            { message: "Carrier not found" },
-            { status: 404 }
-          );
-        }
-
-        const carrier = carriers[0];
-
-        // In a real app, we would send an email to the carrier here
-        // For now, we'll simulate success and just log the action
-        console.log(
-          `Invitation sent to carrier: ${carrier.name} (${carrier.email})`
-        );
-
-        // Update the carrier record to indicate an invitation was sent
-        const timestamp = new Date();
-        await db
-          .update(
-            // Using string directly because of schema issues
-            "carriers" as unknown,
-            { invitation_sent_at: timestamp },
-            { id: carrierId }
-          )
-          .run(sql);
-
-        return NextResponse.json({
-          message: `Invitation sent to ${carrier.email}`,
-          carrier: {
-            ...carrier,
-            invitation_sent_at: timestamp,
-          },
-        });
-      } catch (error) {
-        console.error("Error sending invitation:", error);
+      // Validate request
+      const validation = validateInvitationRequest(id);
+      if (!validation.isValid) {
         return NextResponse.json(
-          { message: "An error occurred while sending the invitation" },
-          { status: 500 }
+          { message: validation.error!.message },
+          { status: validation.error!.statusCode }
         );
       }
+
+      // Find the carrier
+      const carriers = await getCarrierById(validation.entityId!);
+
+      if (!carriers || carriers.length === 0) {
+        return NextResponse.json(
+          { message: "Carrier not found" },
+          { status: 404 }
+        );
+      }
+
+      const carrier = carriers[0];
+
+      // Send invitation using domain logic
+      const result = await sendInvitation(
+        {
+          id: carrier.id,
+          name: carrier.name,
+          email: carrier.email,
+          owner_user_id: null, // Carriers don't have user associations yet
+        },
+        CARRIER_INVITATION_CONFIG,
+        (id, data) => updateCarrier(id, data),
+        session,
+        req
+      );
+
+      return createInvitationResponse(result);
     },
     { requiredRole: "admin" }
   );
