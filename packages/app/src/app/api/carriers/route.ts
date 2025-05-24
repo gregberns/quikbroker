@@ -39,9 +39,9 @@ const CARRIER_CREATION_CONFIG: EntityCreationConfig = {
   entityType: 'carrier',
   createUser: true, // Now carriers will also create users like brokers
   taskIdentifier: 'carrier_email_invite',
-  requiredFields: ['carrier_name', 'email'], // email is needed for user creation
+  requiredFields: ['carrierName', 'email'], // email is needed for user creation
   entitySpecificValidation: (input) => {
-    if (!input.carrier_name || !input.email) {
+    if (!input.carrierName || !input.email) {
       return 'Carrier name and email are required';
     }
     return null;

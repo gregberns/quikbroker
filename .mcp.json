@@ -19,6 +19,15 @@
         "--project-file",
         "/Users/gb/github/ai-experiments/ocaml-state-machine/.serena/project.yml"
       ]
+    },
+    "plane": {
+      "command": "npx",
+      "args": ["-y", "@makeplane/plane-mcp-server"],
+      "env": {
+        "PLANE_API_KEY": "plane_api_5cc11ce151b44704932dc67791c309c3",
+        "PLANE_API_HOST_URL": "https://api.plane.so/",
+        "PLANE_WORKSPACE_SLUG": "quikbroker"
+      }
     }
   }
 }

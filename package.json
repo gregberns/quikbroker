@@ -27,8 +27,7 @@
     "mclookup:start": "yarn workspace @quikbroker/mclookup start",
     "mclookup:lint": "yarn workspace @quikbroker/mclookup lint",
     "schema:new": "dotenv -f .env yarn workspace @quikbroker/schema create-migration",
-    "schema:migrate": "dotenv -f .env yarn workspace @quikbroker/schema migrate",
-    "schema:rollback": "dotenv -f .env yarn workspace @quikbroker/schema rollback"
+    "schema:migrate": "dotenv -f .env yarn workspace @quikbroker/migrations deploy"
   },
   "dependencies": {
     "@types/pg": "^8.11.12",

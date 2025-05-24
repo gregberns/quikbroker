@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS fmcsa.fmcsa_current (
 );
 
 -- Create a view that queries the fmcsa.fmcsa_2025Mar table
-CREATE VIEW app.fmcsa_carrier_view AS
+CREATE OR REPLACE VIEW app.fmcsa_carrier_view AS
 SELECT
     dot_number,
     legal_name,

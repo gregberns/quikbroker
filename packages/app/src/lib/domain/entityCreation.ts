@@ -13,11 +13,13 @@ export interface EntityCreationInput {
   name?: string;
   email?: string;
   contactName?: string;
-  brokerage_name?: string;
+  brokerageName?: string;
   // Carrier fields  
-  carrier_name?: string;
+  carrierName?: string;
   address?: string;
-  // Legacy support
+  // Legacy support for backwards compatibility
+  brokerage_name?: string;
+  carrier_name?: string;
   company?: string;
   phone?: string;
 }
@@ -49,6 +51,23 @@ function generateSecureToken(length = 32) {
   return crypto.randomBytes(length).toString("hex");
 }
 
+// Helper function to normalize input from various formats to camelCase
+function normalizeEntityInput(input: EntityCreationInput): EntityCreationInput {
+  const normalized = { ...input };
+  
+  // Handle carrier fields - prefer camelCase, fallback to snake_case or legacy company
+  if (!normalized.carrierName && (normalized.carrier_name || normalized.company)) {
+    normalized.carrierName = normalized.carrier_name || normalized.company;
+  }
+  
+  // Handle broker fields - prefer camelCase, fallback to snake_case
+  if (!normalized.brokerageName && normalized.brokerage_name) {
+    normalized.brokerageName = normalized.brokerage_name;
+  }
+  
+  return normalized;
+}
+
 export async function createEntity(
   input: EntityCreationInput,
   config: EntityCreationConfig,
@@ -57,8 +76,11 @@ export async function createEntity(
   req: NextRequest
 ): Promise<EntityCreationResult> {
   try {
+    // Normalize input to handle camelCase and legacy formats
+    const normalizedInput = normalizeEntityInput(input);
+    
     // Validate required fields
-    const missingFields = config.requiredFields.filter(field => !input[field as keyof EntityCreationInput]);
+    const missingFields = config.requiredFields.filter(field => !normalizedInput[field as keyof EntityCreationInput]);
     if (missingFields.length > 0) {
       return {
         success: false,
@@ -70,7 +92,7 @@ export async function createEntity(
 
     // Run entity-specific validation if provided
     if (config.entitySpecificValidation) {
-      const validationError = config.entitySpecificValidation(input);
+      const validationError = config.entitySpecificValidation(normalizedInput);
       if (validationError) {
         return {
           success: false,
@@ -82,6 +104,16 @@ export async function createEntity(
     }
 
     if (config.createUser) {
+      // Ensure email is provided for user creation
+      if (!normalizedInput.email) {
+        return {
+          success: false,
+          message: 'Email is required for user creation',
+          statusCode: 400,
+          errorType: 'validation',
+        };
+      }
+
       // Complex flow with user creation - use transaction
       const result = await withTransaction(async () => {
         // 1. Create a temporary random password for the user
@@ -90,13 +122,13 @@ export async function createEntity(
 
         // 2. Create a new user with the appropriate role
         const newUser = await createUser({
-          email: input.email,
+          email: normalizedInput.email!,
           password_hash: passwordHash,
-          role: config.entityType,
+          role: config.entityType === 'carrier' ? 'user' : config.entityType,
         });
 
         // 3. Create the entity record and link it to the user
-        const entity = await createEntityFn(input, newUser.id);
+        const entity = await createEntityFn(normalizedInput, newUser.id);
 
         // 4. Generate an invitation token that expires in 7 days
         const token = generateSecureToken();
@@ -144,7 +176,7 @@ export async function createEntity(
       return result;
     } else {
       // Simple flow without user creation
-      const entity = await createEntityFn(input);
+      const entity = await createEntityFn(normalizedInput);
 
       return {
         success: true,

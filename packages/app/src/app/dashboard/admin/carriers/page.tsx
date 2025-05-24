@@ -15,7 +15,7 @@ interface Carrier {
   id: number;
   name: string;
   email: string;
-  company: string;
+  carrierName: string;
   phone?: string;
   address?: string;
   created_at?: string;
@@ -31,7 +31,7 @@ export default function AdminCarriersPage() {
   const [newCarrier, setNewCarrier] = useState({
     name: '',
     email: '',
-    company: '',
+    carrierName: '',
     phone: '',
     address: '',
   });
@@ -86,7 +86,7 @@ export default function AdminCarriersPage() {
 
       // Close the modal and reset the form
       setShowAddCarrierModal(false);
-      setNewCarrier({ name: '', email: '', company: '', phone: '', address: '' });
+      setNewCarrier({ name: '', email: '', carrierName: '', phone: '', address: '' });
       
       // Trigger a refresh
       setRefreshKey(prev => prev + 1);
@@ -138,7 +138,7 @@ export default function AdminCarriersPage() {
       )
     },
     {
-      key: 'company' as keyof Carrier,
+      key: 'carrierName' as keyof Carrier,
       header: 'Company'
     },
     {
@@ -288,11 +288,11 @@ export default function AdminCarriersPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company Name</Label>
+                  <Label htmlFor="carrierName">Company Name</Label>
                   <Input
-                    id="company"
-                    value={newCarrier.company}
-                    onChange={(e) => setNewCarrier({ ...newCarrier, company: e.target.value })}
+                    id="carrierName"
+                    value={newCarrier.carrierName}
+                    onChange={(e) => setNewCarrier({ ...newCarrier, carrierName: e.target.value })}
                     required
                   />
                 </div>
