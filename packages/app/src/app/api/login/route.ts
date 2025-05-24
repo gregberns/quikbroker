@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { verifyPassword, createSession } from "../../lib/auth";
 import { getUserByEmail } from "@/db/queries/users";
 import { serverLogger } from "../../lib/serverLogger";
+import { internalServerError } from "../error";
 
 export async function POST(req: NextRequest) {
   // Log all login attempts for access tracking
@@ -85,9 +86,7 @@ export async function POST(req: NextRequest) {
     // Log error using server logger
     serverLogger.apiError(req, error);
 
-    return NextResponse.json(
-      { message: "An error occurred during login" },
-      { status: 500 }
-    );
+    // Use the custom error handler to ensure JSON response
+    return internalServerError(req, error instanceof Error ? error : new Error(String(error)));
   }
 }

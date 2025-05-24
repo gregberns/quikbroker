@@ -2,6 +2,41 @@
 ## Bugs
 
 
+- [ ] Invite Carrier Rest Endpoint
+
+```
+ POST /api/carriers/1/invite 500 in 89ms
+Invitation sent to carrier: Carrier Person Name (carrier1@test.com)
+Error sending invitation: error: relation "carriers" does not exist
+    at async POST.requiredRole (src/app/api/carriers/[id]/invite/route.ts:61:8)
+  59 |         // Update the carrier record to indicate an invitation was sent
+  60 |         const timestamp = new Date();
+> 61 |         await db
+     |        ^
+  62 |           .update(
+  63 |             // Using string directly because of schema issues
+  64 |             "carriers" as unknown, {
+  length: 106,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '8',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+```
+
+
 ## Best Practices
 
 [] Build out best practices - Components in `src/components` should not have hard coded paths/urls/hrefs/ect. This will allow them to be reused more reliably in the future. Also if there is hard coded text that is specific to this project, application, business, the text should be passed in via convention. First decide on a proper convention, then document it so we dont forget, then update the components. 

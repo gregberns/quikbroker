@@ -13,9 +13,9 @@ Later on, the state machine can be replaced with another system that actually im
 
 The Actors executing commands can be unit/integration tests, AI Agents, or, later on, a UI or API.
 
-## Data Types
+## Domain Entities
 
-## Actors
+### Actors
 
 Actors in this system are representing external enties that will be taking action from outside the system.
 
@@ -43,6 +43,10 @@ These registries are immutible and are queryable by the PublicIdentifier.
 When an Actor claims they are a Broker with a specific PublicIdentifier, access to that Mailbox needs to be verified.
 
 ## Tasks
+
+The system can generate asyncronus tasks that can be created, but do not require waiting for a result.
+
+Tasks have a Label that identifies a unique task to be processed, and a payload that contains relevant information to process the task.
 
 ## Actions
 
@@ -131,7 +135,4 @@ The system works in this loop:
 * System Loop
   * System will internally process Tasks, Events, etc
 * System Dequeues next Command to be processed
-
-
-
 

@@ -1,8 +1,24 @@
 {
   "mcpServers": {
-    "mcp-server-fetch": {
-      "command": "uvx",
-      "args": ["mcp-server-fetch"]
+    "fetch_save": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/gb/github/ai-experiments/mcp-server-fetch-save/src/mcp_server_fetch_save",
+        "run",
+        "__main__.py"
+      ]
+    },
+    "serena": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/Users/gb/github/ai-experiments/serena",
+        "serena-mcp-server",
+        "--project-file",
+        "/Users/gb/github/ai-experiments/ocaml-state-machine/.serena/project.yml"
+      ]
     }
   }
 }
