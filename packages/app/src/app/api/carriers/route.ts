@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "../../lib/auth";
+import { listCarriers, createCarrier } from "@/db/queries/carriers";
 import {
-  listCarriers,
-  createCarrier,
-  CreateCarrierInput,
-} from "@/db/queries/carriers";
+  createEntity,
+  validateEntityCreationRequest,
+  createEntityResponse,
+  type EntityCreationConfig,
+} from "../../../lib/domain/entityCreation";
 
 export async function GET(req: NextRequest) {
   return requireAuth(
@@ -33,6 +35,19 @@ export async function GET(req: NextRequest) {
   );
 }
 
+const CARRIER_CREATION_CONFIG: EntityCreationConfig = {
+  entityType: 'carrier',
+  createUser: true, // Now carriers will also create users like brokers
+  taskIdentifier: 'carrier_email_invite',
+  requiredFields: ['carrier_name', 'email'], // email is needed for user creation
+  entitySpecificValidation: (input) => {
+    if (!input.carrier_name || !input.email) {
+      return 'Carrier name and email are required';
+    }
+    return null;
+  },
+};
+
 export async function POST(req: NextRequest) {
   return requireAuth(
     req,
@@ -45,28 +60,25 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      try {
-        // Parse the request body
-        const carrierData: CreateCarrierInput = await req.json();
-
-        // Validate input
-        if (!carrierData.name || !carrierData.email || !carrierData.company) {
-          return NextResponse.json(
-            { message: "Name, email, and company are required" },
-            { status: 400 }
-          );
-        }
-
-        const newCarrier = await createCarrier(carrierData);
-        // Return the new carrier as JSON
-        return NextResponse.json({ carrier: newCarrier[0] });
-      } catch (error) {
-        console.error("Error creating carrier:", error);
+      // Validate request body
+      const validation = validateEntityCreationRequest(await req.json());
+      if (!validation.isValid) {
         return NextResponse.json(
-          { message: "An error occurred while creating the carrier" },
-          { status: 500 }
+          { message: validation.error!.message },
+          { status: validation.error!.statusCode }
         );
       }
+
+      // Create carrier using domain logic
+      const result = await createEntity(
+        validation.input!,
+        CARRIER_CREATION_CONFIG,
+        (data, ownerUserId) => createCarrier(data, ownerUserId),
+        session,
+        req
+      );
+
+      return createEntityResponse(result, 'carrier');
     },
     { requiredRole: "admin" }
   );

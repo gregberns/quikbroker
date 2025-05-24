@@ -2,18 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "../../../../lib/auth";
 import { getCarrierById } from "@/db/queries/carriers";
 import { updateCarrier } from "@/db/queries/carriers";
-import { 
-  sendInvitation, 
-  validateInvitationRequest, 
+import { getUserById } from "@/db/queries/users";
+import {
+  sendInvitation,
+  validateInvitationRequest,
   createInvitationResponse,
-  type InvitationConfig 
-} from "../../../../lib/domain/invitations";
+  type InvitationConfig,
+} from "../../../../../lib/domain/invitations";
 
 const CARRIER_INVITATION_CONFIG: InvitationConfig = {
-  entityType: 'carrier',
-  requiresUserAssociation: false,
-  taskIdentifier: 'carrier_email_invite',
-  emailField: 'email',
+  entityType: "carrier",
+  requiresUserAssociation: true, // Now carriers require user association like brokers
+  taskIdentifier: "carrier_email_invite",
+  emailField: "email",
 };
 
 export async function POST(
@@ -53,13 +54,22 @@ export async function POST(
 
       const carrier = carriers[0];
 
+      // Get user email since carriers table no longer has email
+      let userEmail = '';
+      if (carrier.owner_user_id) {
+        const user = await getUserById(carrier.owner_user_id);
+        if (user) {
+          userEmail = user.email;
+        }
+      }
+
       // Send invitation using domain logic
       const result = await sendInvitation(
         {
           id: carrier.id,
-          name: carrier.name,
-          email: carrier.email,
-          owner_user_id: null, // Carriers don't have user associations yet
+          name: carrier.carrier_name,
+          email: userEmail,
+          owner_user_id: carrier.owner_user_id,
         },
         CARRIER_INVITATION_CONFIG,
         (id, data) => updateCarrier(id, data),

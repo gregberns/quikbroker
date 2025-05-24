@@ -7,10 +7,7 @@ import { sql } from "../client";
 
 // Zod schema for carrier input
 export const createCarrierSchema = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
-  company: z.string().min(1),
-  phone: z.string().optional(),
+  carrier_name: z.string().min(1),
   address: z.string().optional(),
 });
 
@@ -20,19 +17,17 @@ export type CreateCarrierInput = z.infer<typeof createCarrierSchema>;
 export async function listCarriers() {
   return await db
     .select("app.carriers", db.all, {
-      order: [{ by: "name", direction: "ASC" }],
+      order: [{ by: "carrier_name", direction: "ASC" }],
     })
     .run(sql);
 }
 
-export async function createCarrier(input: CreateCarrierInput) {
+export async function createCarrier(input: CreateCarrierInput, ownerUserId?: number) {
   return await db
     .insert("app.carriers", {
-      name: input.name,
-      email: input.email,
-      company: input.company,
-      phone: input.phone || null,
+      carrier_name: input.carrier_name,
       address: input.address || null,
+      owner_user_id: ownerUserId || null,
     })
     .run(sql);
 }
@@ -48,14 +43,8 @@ export async function updateCarrier(
   return await db.update("app.carriers", data, { id }).run(sql);
 }
 
-export async function updateCarrierInvitationSentAt(
-  id: number,
-  invitation_sent_at: Date
-) {
-  return await db
-    .update("app.carriers", { invitation_sent_at }, { id })
-    .run(sql);
-}
+// Note: invitation_sent_at functionality moved to user_invites table
+// since carriers now have associated users
 
 export async function deleteCarrier(id: number) {
   return await db.deletes("app.carriers", { id }).run(sql);

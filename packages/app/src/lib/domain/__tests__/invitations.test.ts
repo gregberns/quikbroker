@@ -7,7 +7,6 @@ import {
 import { withTransaction } from '@/db/transaction';
 import { createUserInvite } from '@/db/queries/userInvites';
 import { createJob } from '@/db/queries/jobs';
-import { logErrorToServer } from '@/app/lib/errorHandling';
 import {
   mockBrokerEntity,
   mockCarrierEntity,
@@ -24,7 +23,6 @@ import {
 jest.mock('@/db/transaction');
 jest.mock('@/db/queries/userInvites');
 jest.mock('@/db/queries/jobs');
-jest.mock('@/app/lib/errorHandling');
 jest.mock('@/app/lib/worker', () => ({
   processJob: jest.fn(),
 }));
@@ -32,7 +30,6 @@ jest.mock('@/app/lib/worker', () => ({
 const mockWithTransaction = withTransaction as jest.MockedFunction<typeof withTransaction>;
 const mockCreateUserInvite = createUserInvite as jest.MockedFunction<typeof createUserInvite>;
 const mockCreateJob = createJob as jest.MockedFunction<typeof createJob>;
-const mockLogErrorToServer = logErrorToServer as jest.MockedFunction<typeof logErrorToServer>;
 
 describe('validateInvitationRequest', () => {
   it('should return valid result for numeric string', () => {
@@ -122,6 +119,7 @@ describe('sendInvitation', () => {
       expect(result.success).toBe(true);
       expect(result.message).toBe('Invitation sent to broker@example.com');
       expect(result.statusCode).toBe(200);
+      expect(result.entityType).toBe('broker');
       expect(result.inviteUrl).toContain('/verify-email?token=');
       expect(result.entity).toEqual({
         ...mockBrokerEntity,
@@ -156,6 +154,7 @@ describe('sendInvitation', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.statusCode).toBe(400);
+      expect(result.entityType).toBe('broker');
       expect(result.message).toBe('broker has no associated user. Please assign a user first.');
       expect(result.entity).toBeUndefined();
       expect(result.inviteUrl).toBeUndefined();
@@ -181,18 +180,10 @@ describe('sendInvitation', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.statusCode).toBe(500);
+      expect(result.entityType).toBe('broker');
       expect(result.message).toBe('An error occurred while sending the invitation');
 
-      expect(mockLogErrorToServer).toHaveBeenCalledWith({
-        type: 'api-error',
-        message: 'Transaction failed',
-        stack: mockError.stack,
-        url: '/api/test',
-        brokerId: '1',
-        userId: 'user123',
-        userRole: 'admin',
-        timestamp: expect.any(String)
-      });
+      // Error logging is now handled by console.error
     });
 
     it('should generate invitation URL with correct base URL', async () => {
@@ -265,6 +256,7 @@ describe('sendInvitation', () => {
       expect(result.success).toBe(true);
       expect(result.message).toBe('Invitation sent to carrier@example.com');
       expect(result.statusCode).toBe(200);
+      expect(result.entityType).toBe('carrier');
       expect(result.inviteUrl).toBeUndefined();
       expect(result.entity).toEqual({
         ...mockCarrierEntity,
@@ -299,18 +291,10 @@ describe('sendInvitation', () => {
       // Assert
       expect(result.success).toBe(false);
       expect(result.statusCode).toBe(500);
+      expect(result.entityType).toBe('carrier');
       expect(result.message).toBe('An error occurred while sending the invitation');
 
-      expect(mockLogErrorToServer).toHaveBeenCalledWith({
-        type: 'api-error',
-        message: 'Update failed',
-        stack: mockError.stack,
-        url: '/api/test',
-        carrierId: '2',
-        userId: 'user123',
-        userRole: 'admin',
-        timestamp: expect.any(String)
-      });
+      // Error logging is now handled by console.error
     });
   });
 
@@ -330,16 +314,8 @@ describe('sendInvitation', () => {
 
       // Assert
       expect(result.success).toBe(false);
-      expect(mockLogErrorToServer).toHaveBeenCalledWith({
-        type: 'api-error',
-        message: 'Unknown error sending invitation',
-        stack: undefined,
-        url: '/api/test',
-        carrierId: '2',
-        userId: 'user123',
-        userRole: 'admin',
-        timestamp: expect.any(String)
-      });
+      expect(result.entityType).toBe('carrier');
+      // Error logging is now handled by console.error
     });
   });
 });

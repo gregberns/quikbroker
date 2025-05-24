@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "../../../../lib/auth";
 import { getBrokerById, updateBroker } from "@/db/queries/brokers";
-import { 
-  sendInvitation, 
-  validateInvitationRequest, 
+import {
+  sendInvitation,
+  validateInvitationRequest,
   createInvitationResponse,
-  type InvitationConfig 
-} from "../../../../lib/domain/invitations";
+  type InvitationConfig,
+} from "../../../../../lib/domain/invitations";
 
 const BROKER_INVITATION_CONFIG: InvitationConfig = {
-  entityType: 'broker',
+  entityType: "broker",
   requiresUserAssociation: true,
-  taskIdentifier: 'broker_email_invite',
-  emailField: 'primary_email',
+  taskIdentifier: "broker_email_invite",
+  emailField: "primary_email",
 };
 
 export async function POST(

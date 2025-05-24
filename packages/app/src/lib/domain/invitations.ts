@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { withTransaction } from "@/db/transaction";
 import { createUserInvite } from "@/db/queries/userInvites";
 import { createJob } from "@/db/queries/jobs";
-import { logErrorToServer } from "@/app/lib/errorHandling";
+// Note: Removed logErrorToServer import as it's client-side only
+// TODO: Replace with proper server-side logging solution
 
 export interface InvitationEntity {
   id: number;
@@ -19,6 +20,7 @@ export interface InvitationResult {
   entity?: InvitationEntity & { invitation_sent_at: Date };
   inviteUrl?: string;
   statusCode: number;
+  entityType?: 'broker' | 'carrier';
 }
 
 export interface InvitationConfig {
@@ -46,6 +48,7 @@ export async function sendInvitation(
       success: false,
       message: `${config.entityType} has no associated user. Please assign a user first.`,
       statusCode: 400,
+      entityType: config.entityType,
     };
   }
 
@@ -93,6 +96,7 @@ export async function sendInvitation(
           entity: { ...entity, invitation_sent_at: timestamp },
           inviteUrl,
           statusCode: 200,
+          entityType: config.entityType,
         };
       });
 
@@ -110,30 +114,29 @@ export async function sendInvitation(
         message: `Invitation sent to ${entity.email}`,
         entity: { ...entity, invitation_sent_at: timestamp },
         statusCode: 200,
+        entityType: config.entityType,
       };
     }
   } catch (error) {
-    // Log error
-    logErrorToServer({
-      type: "api-error",
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unknown error sending invitation",
+    // Log error (TODO: Replace with proper server-side logging solution)
+    console.error("Error sending invitation:", {
+      error: error instanceof Error
+        ? error.message
+        : "Unknown error sending invitation",
       stack: error instanceof Error ? error.stack : undefined,
       url: req.url,
-      [config.entityType + 'Id']: entity.id.toString(),
+      entityType: config.entityType,
+      entityId: entity.id.toString(),
       userId: session.id,
       userRole: session.role,
       timestamp: new Date().toISOString(),
     });
-
-    console.error("Error sending invitation:", error);
     
     return {
       success: false,
       message: "An error occurred while sending the invitation",
       statusCode: 500,
+      entityType: config.entityType,
     };
   }
 }
@@ -157,7 +160,7 @@ export function validateInvitationRequest(id: string): {
 
 export function createInvitationResponse(result: InvitationResult): NextResponse {
   if (result.success) {
-    const entityKey = result.entity?.name ? 'broker' : 'carrier';
+    const entityKey = result.entityType || 'entity';
     return NextResponse.json({
       message: result.message,
       [entityKey]: result.entity,

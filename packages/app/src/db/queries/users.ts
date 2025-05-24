@@ -72,7 +72,7 @@ export async function listUsersWithBrokerNames(): Promise<
     `SELECT
       u.id, u.email, u.role, u.created_at, 
       CASE 
-        WHEN u.role = 'broker' THEN b.name 
+        WHEN u.role = 'broker' THEN b.brokerage_name 
         ELSE NULL 
       END as broker_name
     FROM app.users u

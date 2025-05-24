@@ -42,7 +42,7 @@ export const mockSession = {
 
 export const mockRequest = {
   url: '/api/test',
-} as any;
+} as { url: string };
 
 export const mockUserInvite = {
   id: 1,

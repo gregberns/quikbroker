@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, hashPassword } from "../../lib/auth";
-import crypto from "crypto";
-import { getClient } from "@/db/client";
+import { requireAuth } from "../../lib/auth";
+import { listBrokers, createBroker } from "@/db/queries/brokers";
 import {
-  listBrokers,
-  createBroker,
-  CreateBrokerInput,
-} from "@/db/queries/brokers";
-import { createUser } from "@/db/queries/users";
-import { createUserInvite } from "@/db/queries/userInvites";
-import { createJob } from "@/db/queries/jobs";
-
-// Helper function to generate a secure random token
-function generateSecureToken(length = 32) {
-  return crypto.randomBytes(length).toString("hex");
-}
+  createEntity,
+  validateEntityCreationRequest,
+  createEntityResponse,
+  type EntityCreationConfig,
+} from "../../../lib/domain/entityCreation";
 
 export async function GET(req: NextRequest) {
   return requireAuth(
@@ -43,6 +35,19 @@ export async function GET(req: NextRequest) {
   );
 }
 
+const BROKER_CREATION_CONFIG: EntityCreationConfig = {
+  entityType: 'broker',
+  createUser: true,
+  taskIdentifier: 'broker_email_invite',
+  requiredFields: ['name', 'email', 'contactName'],
+  entitySpecificValidation: (input) => {
+    if (!input.name || !input.email || !input.contactName) {
+      return 'Broker company name, email, and primary contact name are required';
+    }
+    return null;
+  },
+};
+
 export async function POST(req: NextRequest) {
   return requireAuth(
     req,
@@ -55,137 +60,25 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      try {
-        // Parse the request body
-        const { name, email, contactName, brokerage_name } =
-          (await req.json()) as CreateBrokerInput;
-
-        // Validate input
-        if (!name || !email || !contactName) {
-          return NextResponse.json(
-            {
-              message:
-                "Broker company name, email, and primary contact name are required",
-            },
-            { status: 400 }
-          );
-        }
-
-        const sql = getClient();
-        try {
-          // Start a transaction
-          await sql.query("BEGIN");
-
-          // 1. Create a temporary random password for the broker user
-          const tempPassword = generateSecureToken(12);
-          // Use the centralized password hashing function
-          const passwordHash = await hashPassword(tempPassword);
-
-          // 2. Create a new user with the broker role
-          const newUser = await createUser({
-            email,
-            password_hash: passwordHash,
-            role: "broker",
-          });
-
-          // 3. Create the broker record and link it to the user
-          const ownerUserId = newUser.id;
-          await createBroker(
-            { name, email, contactName, brokerage_name },
-            ownerUserId
-          );
-
-          // 4. Generate an invitation token that expires in 7 days
-          const token = generateSecureToken();
-          const expiresAt = new Date();
-          expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
-
-          // 5. Create an invitation record
-          const invite = await createUserInvite({
-            user_id: newUser.id,
-            token,
-            expires_at: expiresAt,
-          });
-
-          // 6. Create a job to send the broker invitation email
-          const job = await createJob({
-            task_identifier: "broker_email_invite",
-            payload: { user_invite_id: invite.id },
-          });
-
-          // Process the job immediately in development mode
-          if (process.env.NODE_ENV !== "production") {
-            // Dynamic import to avoid circular dependency
-            const { processJob } = await import("../../lib/worker");
-            // @ts-expect-error fuck typescript
-            await processJob(job.task_identifier, job.payload);
-          }
-
-          // Commit the transaction
-          await sql.query("COMMIT");
-
-          // Generate the invitation URL (in a real app, this would be your domain)
-          const inviteUrl = `${
-            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-          }/verify-email?token=${token}`;
-
-          // Return the new broker and invitation URL
-          return NextResponse.json({
-            broker: {
-              name,
-              primary_email: email,
-              owner_user_id: ownerUserId,
-              brokerage_name,
-            },
-            user: {
-              id: newUser.id,
-              email: newUser.email,
-              role: newUser.role,
-            },
-            inviteUrl,
-          });
-        } catch (error) {
-          // Rollback the transaction on error
-          await sql.query("ROLLBACK");
-          throw error;
-        }
-      } catch (error) {
-        // Check for unique constraint violations
-        if (
-          error instanceof Error &&
-          "code" in error &&
-          error.code === "23505"
-        ) {
-          if (
-            "constraint" in error &&
-            error.constraint === "brokers_primary_email_key"
-          ) {
-            return NextResponse.json(
-              { message: "A broker with this email already exists" },
-              { status: 409 }
-            );
-          }
-        }
-
-        if (
-          error instanceof Error &&
-          "code" in error &&
-          error.code === "23505"
-        ) {
-          if ("constraint" in error && error.constraint === "users_email_key") {
-            return NextResponse.json(
-              { message: "A user with this email already exists" },
-              { status: 409 }
-            );
-          }
-        }
-
-        console.error("Error creating broker:", error);
+      // Validate request body
+      const validation = validateEntityCreationRequest(await req.json());
+      if (!validation.isValid) {
         return NextResponse.json(
-          { message: "An error occurred while creating the broker" },
-          { status: 500 }
+          { message: validation.error!.message },
+          { status: validation.error!.statusCode }
         );
       }
+
+      // Create broker using domain logic
+      const result = await createEntity(
+        validation.input!,
+        BROKER_CREATION_CONFIG,
+        (data, ownerUserId) => createBroker(data, ownerUserId),
+        session,
+        req
+      );
+
+      return createEntityResponse(result, 'broker');
     },
     { requiredRole: "admin" }
   );
