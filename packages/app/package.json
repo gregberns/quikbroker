@@ -9,7 +9,11 @@
     "fix": "npx @next/codemod",
     "lint": "next lint && npx tsc --noEmit",
     "format": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\"",
-    "generate-db-types": "dotenv -f ../../.env -- npx zapatos"
+    "generate-db-types": "dotenv -f ../../.env -- npx zapatos",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:domain": "jest src/lib/domain"
   },
   "dependencies": {
     "@quikbroker/ui-components": "*",
@@ -34,6 +38,10 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/pg": "^8.11.13",
     "@types/react": "^19",
@@ -41,7 +49,10 @@
     "dotenv-cli": "^8.0.0",
     "eslint": "^9.25.1",
     "eslint-config-next": "15.3.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.3.4",
     "typescript": "^5",
     "zapatos": "^6.5.0"
   }

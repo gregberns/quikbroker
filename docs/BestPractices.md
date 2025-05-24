@@ -611,6 +611,106 @@ Tests must pass before code can be merged:
 3. **Use Type-Safe Mocks**: Leverage TypeScript for mock type safety
 4. **Reset Mocks**: Clear mocks between tests to avoid test interference
 
+## Database Transaction Best Practices
+
+### Transaction Abstraction
+
+**Never use direct SQL transaction commands in domain logic.** Always use the transaction abstraction utility.
+
+#### ❌ BAD - Direct SQL in domain logic
+```typescript
+// BAD - domain logic contains SQL commands
+export async function sendInvitation() {
+  const sql = getClient();
+  try {
+    await sql.query("BEGIN");
+    // business logic
+    await sql.query("COMMIT");
+  } catch (error) {
+    await sql.query("ROLLBACK");
+    throw error;
+  }
+}
+```
+
+#### ✅ GOOD - Use transaction abstraction
+```typescript
+// GOOD - clean domain logic using transaction utility
+import { withTransaction } from "@/db/transaction";
+
+export async function sendInvitation() {
+  return await withTransaction(async () => {
+    // business logic here
+    // automatic rollback on error
+    return result;
+  });
+}
+```
+
+### Transaction Utility Usage
+
+The `withTransaction` utility automatically handles:
+- BEGIN transaction
+- COMMIT on success
+- ROLLBACK on error
+- Proper error propagation
+
+```typescript
+// src/db/transaction.ts
+export async function withTransaction<T>(fn: () => Promise<T>): Promise<T> {
+  const sql = getClient();
+  
+  try {
+    await sql.query("BEGIN");
+    const result = await fn();
+    await sql.query("COMMIT");
+    return result;
+  } catch (error) {
+    try {
+      await sql.query("ROLLBACK");
+    } catch (rollbackError) {
+      console.error("Failed to rollback transaction:", rollbackError);
+    }
+    throw error;
+  }
+}
+```
+
+### When to Use Transactions
+
+Use transactions when you need to ensure multiple operations succeed or fail together:
+
+```typescript
+// Example: Creating user invite with job
+const result = await withTransaction(async () => {
+  const invite = await createUserInvite(userData);
+  const job = await createJob({ user_invite_id: invite.id });
+  await updateEntity(entityId, { invitation_sent_at: new Date() });
+  return { invite, job };
+});
+```
+
+### Testing Transactions
+
+Mock the transaction utility in tests to avoid database dependencies:
+
+```typescript
+// __tests__/invitations.test.ts
+jest.mock('@/db/transaction', () => ({
+  withTransaction: jest.fn((fn) => fn()),
+}));
+
+describe('sendInvitation', () => {
+  it('should execute business logic within transaction', async () => {
+    const mockWithTransaction = require('@/db/transaction').withTransaction;
+    
+    await sendInvitation(entity, config, updateFn, session, req);
+    
+    expect(mockWithTransaction).toHaveBeenCalledWith(expect.any(Function));
+  });
+});
+```
+
 ### Testing Anti-Patterns to Avoid
 
 ❌ **Don't test implementation details**

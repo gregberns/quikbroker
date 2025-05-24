@@ -1,9 +1,9 @@
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { getClient } from "@/db/client";
+import { withTransaction } from "@/db/transaction";
 import { createUserInvite } from "@/db/queries/userInvites";
 import { createJob } from "@/db/queries/jobs";
-import { logErrorToServer } from "../errorHandling";
+import { logErrorToServer } from "@/app/lib/errorHandling";
 
 export interface InvitationEntity {
   id: number;
@@ -49,15 +49,12 @@ export async function sendInvitation(
     };
   }
 
-  const sql = getClient();
   const timestamp = new Date();
 
   try {
-    // Start transaction if user association is required (more complex flow)
     if (config.requiresUserAssociation) {
-      await sql.query("BEGIN");
-
-      try {
+      // Complex flow with user association - use transaction
+      const result = await withTransaction(async () => {
         // Generate invitation token and create invite record
         const token = generateSecureToken();
         const expiresAt = new Date();
@@ -77,16 +74,13 @@ export async function sendInvitation(
 
         // Process job immediately in development
         if (process.env.NODE_ENV !== "production") {
-          const { processJob } = await import("../worker");
+          const { processJob } = await import("@/app/lib/worker");
           // @ts-expect-error Dynamic import type issue
           await processJob(job.task_identifier, job.payload);
         }
 
         // Update entity record
         await updateEntityFn(entity.id, { invitation_sent_at: timestamp });
-
-        // Commit transaction
-        await sql.query("COMMIT");
 
         // Generate invitation URL
         const inviteUrl = `${
@@ -100,10 +94,9 @@ export async function sendInvitation(
           inviteUrl,
           statusCode: 200,
         };
-      } catch (error) {
-        await sql.query("ROLLBACK");
-        throw error;
-      }
+      });
+
+      return result;
     } else {
       // Simple flow without user association - just update timestamp
       console.log(
